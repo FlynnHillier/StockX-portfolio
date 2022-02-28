@@ -1,10 +1,18 @@
 const path = require("path")
 const express = require("express")
+const sessions = require("express-session")
+const bodyparser = require("body-parser")
+
 
 function route_handling(app,mongoose_instance,config){
 
+    app.use(sessions(config.sessions))
+    app.use(bodyparser.urlencoded({ extended: true }))
+    app.use(bodyparser.json())
 
     const api = require(path.join(config.directories.routes,"api","api_RouteHandling.js"))(mongoose_instance,config)
+
+
 
 
 

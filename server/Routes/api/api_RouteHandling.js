@@ -1,5 +1,6 @@
 const path = require("path")
 const express = require("express")
+const sessions = require("express-session")
 
 function build_api_router(mongoose_instance,config){
 
@@ -9,6 +10,9 @@ function build_api_router(mongoose_instance,config){
     const private_api_routeHandler = require(path.join(__dirname,"private","private_api_RouteHandling.js"))(mongoose_instance,config)
 
 
+
+
+    api_routeHandler.use(sessions(config.sessions))
 
 
 
