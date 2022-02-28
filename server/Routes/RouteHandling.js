@@ -1,10 +1,17 @@
 const path = require("path")
 const express = require("express")
+const sessions = require("express-session")
+
+
 
 function route_handling(app,mongoose_instance,config){
 
+    app.use(sessions(config.sessions))
+
 
     const api = require(path.join(config.directories.routes,"api","api_RouteHandling.js"))(mongoose_instance,config)
+
+
 
 
 
