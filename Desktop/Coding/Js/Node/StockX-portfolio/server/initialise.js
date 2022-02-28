@@ -118,8 +118,10 @@ const init_result = new Promise((resolve,reject)=>{
 
     try{
     
-    //Route Handling
 
+        console.log(join(global_config.directories.routes,"RouteHandling.js"))
+    const x = require(join(global_config.directories.routes,"RouteHandling.js"))(app,mongoose,global_config)
+        console.log(x)
     }
     catch(err){
         throw err
