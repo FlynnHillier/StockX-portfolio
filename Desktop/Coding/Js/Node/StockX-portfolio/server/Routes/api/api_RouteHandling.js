@@ -3,21 +3,22 @@ const express = require("express")
 
 function build_api_router(mongoose_instance,config){
 
-    const api_router = express.Router()
+    const api_routeHandler = express.Router()
+
+    const open_api_routeHandler = require(path.join(__dirname,"open","open_api_RouteHandling.js"))(mongoose_instance,config)
+    const private_api_routeHandler = require(path.join(__dirname,"private","private_api_RouteHandling.js"))(mongoose_instance,config)
 
 
 
 
-    api_router.get("/hello",(req,res)=>{
-        res.status(200).send("hello!")
-    })
 
-
-    console.log("hiiiii")
+    api_routeHandler.use("/private",private_api_routeHandler)
+    api_routeHandler.use("/",open_api_routeHandler)
 
 
 
-    return api_router
+
+    return api_routeHandler
 }
 
 module.exports = build_api_router

@@ -89,7 +89,6 @@ const loading_message_interval = loading_message("initialising application")
 const init_result = new Promise((resolve,reject)=>{
         establish_mongoDB_connection(mongoose,global_config.mongo.access_uri,init_settings.mongoClient_connection_config)
         .then((resolution)=>{
-            console.log("Mongo DB")
             listen(app,init_settings.port,init_settings.listen_retry_attempts,init_settings.listen_retry_delay,init_settings.listen_silent)
             .then((resolution)=>{
                 console.log("Listening")
@@ -119,9 +118,7 @@ const init_result = new Promise((resolve,reject)=>{
     try{
     
 
-        console.log(join(global_config.directories.routes,"RouteHandling.js"))
-    const x = require(join(global_config.directories.routes,"RouteHandling.js"))(app,mongoose,global_config)
-        console.log(x)
+    require(join(global_config.directories.routes,"RouteHandling.js"))(app,mongoose,global_config)
     }
     catch(err){
         throw err
