@@ -19,7 +19,7 @@ const MongoStore = require("connect-mongo")
     }
 
     let mongo = {
-        access_uri:"mongodb+srv://app-dev:temp@cluster0.jjpy4.mongodb.net/stockX-Portfolio-App?retryWrites=true&w=majority",
+        access_uri:"mongodb+srv://app-dev:temp@cluster0.jjpy4.mongodb.net/StockX-Portfolio-App?retryWrites=true&w=majority",
         mongoose_models: require("./mongoose_models.js")
     }
 
