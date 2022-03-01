@@ -15,9 +15,10 @@ function build_auth_signup_router(mongoose_instance,config){
 
 
         if(config.request_schema.user(req.body).result === false){
-            res.status(400).send({
+            res.status(403).send({
                 message:"bad request"
             })
+
         } else{
             
             config.mongo.mongoose_models.user.findOne({
