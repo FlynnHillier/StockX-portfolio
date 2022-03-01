@@ -8,10 +8,8 @@ function build_auth_router(mongoose_instance,config){
 
     const auth_router = express.Router()
 
-
-
-    const login = require(path.join(content_dir,"login"))(mongoose_instance,config)
-    const signup = require(path.join(content_dir,"signup"))(mongoose_instance,config)
+    const login = require(path.join(content_dir,"auth_login"))(mongoose_instance,config)
+    const signup = require(path.join(content_dir,"auth_signup"))(mongoose_instance,config)
 
 
 

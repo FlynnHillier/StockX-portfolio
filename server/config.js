@@ -1,6 +1,8 @@
 const {join} = require("path")
 const MongoStore = require("connect-mongo")
 
+
+
     let init_settings = {
         port : 5000,
         listen_retry_attempts : 3,
@@ -20,7 +22,7 @@ const MongoStore = require("connect-mongo")
 
     let mongo = {
         access_uri:"mongodb+srv://app-dev:temp@cluster0.jjpy4.mongodb.net/StockX-Portfolio-App?retryWrites=true&w=majority",
-        mongoose_models: require("./mongoose_models.js")
+        mongoose_models: require("./misc/mongoose_models.js")
     }
 
 
@@ -39,8 +41,17 @@ const MongoStore = require("connect-mongo")
 
 
 
+    const request_schema = require("./misc/request_schema_funcs.js")
+    
+    let request_schema_config = {
 
+        user:request_schema.create([
+            {key:"email", validation_func:request_schema.isEmail},
+            {key:"username", validation_func:request_schema.isString},
+            {key:"password", validation_func:request_schema.isString}
+        ]),
 
+    }
 
 
 module.exports = {
@@ -50,5 +61,6 @@ module.exports = {
         directories:directories,
         sessions:sessions,
         mongo:mongo,
+        request_schema:request_schema_config,
     }
 }
