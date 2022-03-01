@@ -66,29 +66,53 @@ const MongoStore = require("connect-mongo")
         }
 
 
-        return function(req_body){
+        return function(req_body){ //code 0 means required key not present , code 1 means failed verification func
+
+
+            let failed_keys = []
             for(let i = 0; i < array_required_keys.length; i++){
 
                 if(typeof array_required_keys[i] == "object"){
 
                     if(!req_body[array_required_keys[i].key]){
-                        return {result:false,message:`${array_required_keys[i].key} was an expected key but was not provided.`}
+
+                        failed_keys.push({
+                            name:array_required_keys[i].key,
+                            code:0,  
+                        })
+                        continue
+                        // return {result:false,message:`${array_required_keys[i].key} was an expected key but was not provided.`}
                     }
 
                     if(!array_required_keys[i].validation_func(req_body[array_required_keys[i].key]) === true){
-                        return {result:false,message:`key '${array_required_keys[i].key}'  did not get a respone of 'true' from the provided validation function`}
+                        // return {result:false,message:`key '${array_required_keys[i].key}'  did not get a respone of 'true' from the provided validation function`}
+                        failed_keys.push({
+                            name:array_required_keys[i].key,
+                            code:1,  
+                        })
+                        continue
                     }
 
 
 
                 } else{
                     if(!req_body[array_required_keys[i]]){
-                        return {result:false,message:`${array_required_keys[i]} was an expected key but was not provided.`}
+                        failed_keys.push({
+                            name:array_required_keys[i],
+                            code:0,  
+                        })
+                        continue
                     }
                 }
 
             }
-            return {result:true}
+            
+            if(failed_keys.length == 0){
+                return {result:true}
+            } else{
+                return {result:false,failed_keys:failed_keys}
+            }
+
         }
     }
 
@@ -96,11 +120,11 @@ const MongoStore = require("connect-mongo")
 
     let request_schema = {
 
-        user:create_request_schema(["email",{key:"username",validation_func:function(){return true}},"password"]),
+        user:create_request_schema(["email",{key:"username",validation_func:function(){return false}},"password"]),
 
     }
 
-    // console.log(request_schema.user({"email":"jjj@gmail.com","password":"pass","username":"hello"}))
+    //console.log(request_schema.user({"emaill":"jjj@gmail.com","passwordd":"pass","username":"hello"}))
 
 
 
