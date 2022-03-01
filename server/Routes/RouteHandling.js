@@ -10,6 +10,7 @@ function route_handling(app,mongoose_instance,config){
     app.use(bodyparser.urlencoded({ extended: true }))
     app.use(bodyparser.json())
 
+
     const api = require(path.join(config.directories.routes,"api","api_RouteHandling.js"))(mongoose_instance,config)
     const auth = require(path.join(config.directories.routes,"auth","auth_RouteHandling.js"))(mongoose_instance,config)
 
