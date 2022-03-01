@@ -11,9 +11,7 @@ function build_auth_signup_router(mongoose_instance,config){
     auth_signup_router
     .route("/")
     .post((req,res)=>{
-        console.log("hiiiiiiii")
-        console.log(req.body)
-        if(!config.request_schema.user(req.body)){
+        if(!config.request_schema.user(req.body).result){
             res.status(500).send("Sorry invalid request!")
         } else{
             res.status(200).send("u valid!")

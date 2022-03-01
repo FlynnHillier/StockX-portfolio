@@ -27,6 +27,8 @@ function route_handling(app,mongoose_instance,config){
 
     app.use((err,req,res,next)=>{
         res.status(500).send("Sorry you encountered something we werent expecting!")
+
+        console.log(err)
     })
 }
 

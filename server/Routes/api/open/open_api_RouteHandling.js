@@ -7,7 +7,6 @@ function build_open_api_router(mongoose_instance,config){
 
     open_api_routeHandler
     .get("/test",(req,res)=>{
-        console.log("hi")
         res.status(200).send("Testing open API")
     })
 

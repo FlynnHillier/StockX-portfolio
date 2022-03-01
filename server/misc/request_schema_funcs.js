@@ -1,3 +1,6 @@
+const e = require("express")
+const req = require("express/lib/request")
+
 function create_schema(array_required_keys){ // array_required_keys == ["key","key1","key2"] || [{key:"key1",validation_func:<function, returning true if 'key' value passes its contained validation>},"Key2",{key:"key3",validation_func:<another validation function>}]
 
     for(let i = 0; i < array_required_keys.length; i++){
@@ -26,7 +29,27 @@ function create_schema(array_required_keys){ // array_required_keys == ["key","k
 
 
     return function(req_body){ //code 0 means required key not present , code 1 means failed verification func
+        
+        if(!typeof req_body == "object"){
+            throw "cannot parse 'req_body' as expected type object"
+        }
 
+        if(Array.isArray(req_body)){
+            if(req_body.length == 0){
+                throw "cannot parse 'req_body', expected singular 'req_body' object, recieved 0-length array."
+            }
+            if(req_body.length != 1) {
+                throw "cannot parse 'req_body', expected singular 'req_body' object, recieved array. (will not throw if passed a 0-index array containing a singular object)"
+            } else{
+                req_body = req_body[0]
+            }
+        }
+
+
+
+        if(! (typeof req_body === "object" ) || (Array.isArray(req_body) || req_body == null )){
+            throw "cannot parse 'req_body', expected singular object value. recieved something unexpected."
+        }
 
         let failed_keys = []
         for(let i = 0; i < array_required_keys.length; i++){
