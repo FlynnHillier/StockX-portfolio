@@ -26,9 +26,19 @@ function route_handling(app,mongoose_instance,config){
 
 
     app.use((err,req,res,next)=>{
-        res.status(500).send("Sorry you encountered something we werent expecting!")
-
-        console.log(err)
+        
+        if(err.message){
+            res.status(500).send({
+                error:true,
+                message:err.message
+            })
+        } else{
+            res.status(500).send({
+                error:true,
+                message:"an unprecidented error occured."
+            })
+            console.log(`**UNPRECIDENTED ERROR** : \n ${err}`)
+        }
     })
 }
 

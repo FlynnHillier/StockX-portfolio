@@ -116,7 +116,16 @@ const init_result = new Promise((resolve,reject)=>{
 
 
     try{
-    
+        
+
+        mongoose.connection.on("disconnected",()=>{
+            alert("hi")
+            console.log("disconnected!!!")
+        })
+
+
+
+
 
     require(join(global_config.directories.routes,"RouteHandling.js"))(app,mongoose,global_config)
     }

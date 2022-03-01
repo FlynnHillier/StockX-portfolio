@@ -6,7 +6,7 @@ const schema = mongoose.Schema
 
 mongoose_models = {
 
-    //user:model("user",new schema({username:'string',password:'string'})),
+    user:model("user",new schema({password:'string',email:'string'})),
 
 }
 

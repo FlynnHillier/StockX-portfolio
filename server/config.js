@@ -22,7 +22,11 @@ const MongoStore = require("connect-mongo")
 
     let mongo = {
         access_uri:"mongodb+srv://app-dev:temp@cluster0.jjpy4.mongodb.net/StockX-Portfolio-App?retryWrites=true&w=majority",
-        mongoose_models: require("./misc/mongoose_models.js")
+        mongoose_models: require("./misc/mongoose_models.js"),
+
+        user_creation:{
+            salt_rounds:13,
+        }
     }
 
 
@@ -47,7 +51,6 @@ const MongoStore = require("connect-mongo")
 
         user:request_schema.create([
             {key:"email", validation_func:request_schema.isEmail},
-            {key:"username", validation_func:request_schema.isString},
             {key:"password", validation_func:request_schema.isString}
         ]),
 
