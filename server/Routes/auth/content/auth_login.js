@@ -18,7 +18,6 @@ function build_auth_login_router(mongoose_instance,config){
                 message:"bad request"
             })
             
-            console.log("hello")
 
         } else{
             config.mongo.mongoose_models.user.findOne({
