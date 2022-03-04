@@ -10,7 +10,11 @@ const MongoStore = require("connect-mongo")
         listen_silent : true,
         mongoClient_connection_config: {
             connectTimeoutMS: 5000,
-            serverSelectionTimeoutMS: 6000
+            serverSelectionTimeoutMS: 6000,
+            useUnifiedTopology: true,
+            useNewUrlParser: true,
+            autoIndex: true, //this is the code I added that solved it all
+            keepAlive: true,
         }
     }
 
@@ -45,15 +49,10 @@ const MongoStore = require("connect-mongo")
 
 
 
-    const request_schema = require("./misc/request_schema_funcs.js")
-    
-    let request_schema_config = {
+    const {components} = require("./misc/request_schema_components")
 
-        user:request_schema.create([
-            {key:"email", validation_func:request_schema.isEmail},
-            {key:"password", validation_func:request_schema.isString}
-        ]),
-
+    let req_schemas = {
+        components: components
     }
 
 
@@ -64,6 +63,6 @@ module.exports = {
         directories:directories,
         sessions:sessions,
         mongo:mongo,
-        request_schema:request_schema_config,
+        // request_schema:request_schema_config,
     }
 }
