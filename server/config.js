@@ -63,6 +63,6 @@ module.exports = {
         directories:directories,
         sessions:sessions,
         mongo:mongo,
-        // request_schema:request_schema_config,
+        req_schemas:req_schemas,
     }
 }
