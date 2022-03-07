@@ -14,7 +14,7 @@ const NavBar = ({components}) => {
             alert(selectedKey)
         }}
 
-        className="bg-dark border-top border-bottom border-white ps-2"
+        className="bg-dark border-top border-bottom border-1 border-secondary ps-2"
     >
 
 
