@@ -10,26 +10,17 @@ const Title = ({title}) => {
   return (
       <Container 
         fluid 
-        className="title_container bg-dark text-light" 
-        // style={
-        //   {
-        //     height:(0.25)
-        //   }
-        // }
+        className="title_container bg-dark" 
       >
           <Row 
             className="bg-dark h-100 g-0 align-items-center"
           >
             <Col 
               xs={12} 
-              className="p-10"
+              className="ps-3"
             >
 
-              <p className='title'
-                // style={{
-                //   fontSize:45
-                // }}
-              >
+              <p className='title'>
                 {title}
               </p>
 

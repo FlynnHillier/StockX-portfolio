@@ -5,3 +5,25 @@
 .title_container {
     height: 5rem;
 }
+
+
+.App{
+    color: whitesmoke;
+}
+
+.container-fluid{
+    padding: 0;
+ }
+
+
+.nav-item>a{
+    color:lightblue;
+}
+
+.nav-item>a:hover{
+    color:rgb(0, 132, 255)
+}
+
+.nav-item>a>.active{
+    color:purple;
+}

@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import urlPropType from 'url-prop-type';
 
-import 'bootstrap/dist/css/bootstrap.css'
 import { Nav } from 'react-bootstrap'
 
 
@@ -14,13 +13,15 @@ const NavBar = ({components}) => {
         onSelect={(selectedKey) => {
             alert(selectedKey)
         }}
+
+        className="bg-dark border-top border-bottom border-white ps-2"
     >
 
 
         {components.map((component) => {
             return (
             <Nav.Item key={component.name}>
-                <Nav.Link href={component.url}> {component.name} </Nav.Link>
+                <Nav.Link href={component.url} className="border-left border-right border-white"> {component.name} </Nav.Link>
             </Nav.Item>
             )
         })}
@@ -34,7 +35,7 @@ NavBar.propTypes = {
     components:PropTypes.arrayOf(PropTypes.shape({
         url:urlPropType.isRequired,
         name:PropTypes.string.isRequired
-    }))
+    })),
 }
 
 export default NavBar
