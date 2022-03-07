@@ -1,3 +1,4 @@
+import 'bootstrap/dist/css/bootstrap.css'
 import './styles.css';
 import Title from './components/Title';
 
@@ -5,7 +6,7 @@ import Title from './components/Title';
 function App() {
   return (
     <div className="App">
-        <Title text="This is my Title!"></Title>
+        <Title title="Title!"></Title>
     </div>
   );
 }
