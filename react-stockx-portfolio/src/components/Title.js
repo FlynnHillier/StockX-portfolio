@@ -10,23 +10,14 @@ const Title = ({title}) => {
   return (
       <Container 
         fluid 
-        className="title_container bg-dark" 
+        className="title_container overflow-hidden" 
       >
-          <Row 
-            className="bg-dark h-100 g-0 align-items-center"
-          >
-            <Col 
-              xs={12} 
-              className="ps-3"
-            >
+
 
               <p className='title'>
                 {title}
               </p>
 
-            </Col>
-
-          </Row>
       </Container>
 
   )

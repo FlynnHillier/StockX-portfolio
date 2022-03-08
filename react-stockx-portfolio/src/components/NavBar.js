@@ -4,6 +4,9 @@ import urlPropType from 'url-prop-type';
 
 import { Nav } from 'react-bootstrap'
 
+import './StyleSheets/navbar.css'
+
+
 
 
 const NavBar = ({components}) => {
@@ -14,14 +17,14 @@ const NavBar = ({components}) => {
             alert(selectedKey)
         }}
 
-        className="bg-dark border-top border-bottom border-1 border-secondary ps-2"
+        className="border-top border-bottom border-1 border-secondary ps-2"
     >
 
 
         {components.map((component) => {
             return (
             <Nav.Item key={component.name}>
-                <Nav.Link href={component.url} className="border-left border-right border-white"> {component.name} </Nav.Link>
+                <Nav.Link href={component.url} > {component.name} </Nav.Link>
             </Nav.Item>
             )
         })}
