@@ -56,6 +56,10 @@ const MongoStore = require("connect-mongo")
     }
 
 
+
+    let stockx_api = require("./misc/stockx-api")
+
+
 module.exports = {
     init_settings:init_settings,
     
@@ -64,5 +68,6 @@ module.exports = {
         sessions:sessions,
         mongo:mongo,
         req_schemas:req_schemas,
+        stockx_api:stockx_api
     }
 }
