@@ -1,7 +1,7 @@
 const path = require("path")
 const express = require("express")
 const bcrypt = require("bcrypt")
-
+const { checkSchema , validationResult } = require("express-validator")
 
 
 function build_auth_login_router(mongoose_instance,config){
@@ -12,15 +12,22 @@ function build_auth_login_router(mongoose_instance,config){
 
     auth_login_router
     .route("/")
-    .post((req,res)=>{
-        if(config.request_schema.user(req.body).result === false){
-            res.status(403).send({
-                message:"bad request"
-            })
-            
-            console.log("hello")
+    .post(
+        checkSchema({
+            email:config.req_schemas.components.email,
+            password:config.req_schemas.components.password            
+        }),
+        (req,res,next)=>{
 
-        } else{
+            const req_errors = validationResult(req).errors
+            if(req_errors.length !== 0){
+                return res.status(200).send({
+                    result:false,
+                    message:req_errors[0].msg
+                })
+            }
+
+
             config.mongo.mongoose_models.user.findOne({
                 email:req.body.email
             })
@@ -30,24 +37,24 @@ function build_auth_login_router(mongoose_instance,config){
                         result:false,
                         message:"user not found."
                     })
-                } else{
+                }
 
+                if(user_info !== null){
                     bcrypt.compare(req.body.password,user_info.password)
                     .then((comparison_result)=>{
                         if(comparison_result === false){
-                            res.status(200).send({
+                            return res.status(200).send({
                                 result:false,
                                 message:"passwords did not match."
                             })
                         } 
                         else{
-                            req.session.authKey = req.body.email
-                            res.status(200).send({
+                            req.session.authKey = user_info.authKey
+                            return res.status(200).send({
                                 result:true,
                                 message:"logged in successfully."
                             })
                         }
-
 
                     })
                     .catch((error)=>{
@@ -55,19 +62,13 @@ function build_auth_login_router(mongoose_instance,config){
                             message:"bcrypt hash comparison failure."
                         }
                     })
-
                 }  
-
-
-                
-            }).catch((error)=>{
-                res.status(500).send({
-                    expected:true,
-                    message:"error contacting database."
-                })
+            })
+            .catch((error)=>{
+                next(error)
             })
         }
-    })
+    )
 
 
 
