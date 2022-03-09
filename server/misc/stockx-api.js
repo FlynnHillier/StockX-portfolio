@@ -1,10 +1,13 @@
 const axios = require("axios")
+const cheerio = require("cheerio")
+
+
 
 axios.defaults.headers.common = {
         "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
     }
 
-axios.defaults.baseURL = "https://stockx.com/api/"
+axios.defaults.baseURL = "https://stockx.com/"
 
 const currency = "GBP"
 
@@ -20,7 +23,7 @@ function search_item(search_term,max_results=4){
         }
 
         axios.get(
-            "/browse",
+            "/api/browse",
             {
                 params:{
                     currency: currency,
@@ -77,13 +80,56 @@ function search_item(search_term,max_results=4){
 
 
 
-// search_item("yeezy 500",6)
-// .then((response)=>{
-//     console.log(response)
-// })
-// .catch((error)=>{
-//     console.error(error)
-// })
+function get_product_pricing_info(product_urlKey){
+    return new Promise((resolves,rejects)=>{
+        
+        axios.get(
+            `/${product_urlKey}`
+        )
+        .then((result)=>{
+            if(result.status !== 200){
+                rejects({
+                    reason:"status code incorrect"
+                })
+            }
+
+            const $ = cheerio.load(result.data)
+
+            try {
+            var offers = JSON.parse($($('script[type="application/ld+json"]')[3]).html()).offers
+            } catch(err){
+                rejects({
+                    error:error,
+                    reason:"parse error of expected offers content",
+                })
+            }
+            
+            let response = []
+            for(let offer of offers.offers){
+                response.push({
+                    size:offer.description,
+                    ask:offer.price
+                })
+            }
+
+            resolves(response)
+        })
+        .catch((error)=>{
+            rejects({
+                reason:"axios error",
+                error:error
+            })
+        })
+    })
+}
+
+
+
+get_product_pricing_info("adidas-yeezy-500-clay-brown").then((result)=>{
+    console.log(result)
+}).catch((err)=>{
+    console.error(err)
+})
 
 
 module.exports = {
