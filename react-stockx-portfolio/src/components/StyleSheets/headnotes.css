@@ -1,0 +1,12 @@
+.headNotes a {
+    color:whitesmoke;
+}
+
+.headNotes a:hover {
+    color:rgb(190, 190, 190);
+}
+
+.headNotes p {
+    color: whitesmoke;
+}
+
