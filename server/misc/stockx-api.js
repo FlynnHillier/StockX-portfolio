@@ -1,5 +1,6 @@
 const axios = require("axios")
 const cheerio = require("cheerio")
+const res = require("express/lib/response")
 
 
 
@@ -85,7 +86,7 @@ function get_product_info(product_urlKey){
     return new Promise((resolves,rejects)=>{
         
         axios({
-            url:"https://stockx.com/p/e",
+            url:"/p/e",
             method:"post",
             data:{
                     operationName: "GetProduct",
@@ -137,7 +138,14 @@ function get_product_specific_sizing(sizes=[],urlKey){
         get_product_info(urlKey)
         .then((data)=>{
 
+            if(data === null || data === undefined){
+               resolves({
+                productFound:false,
+               })
+            }
+            
             let response = {
+                productFound:true,
                 imageURL:data.media.imageUrl,
                 listingType:data.listingType,
                 sizes:{

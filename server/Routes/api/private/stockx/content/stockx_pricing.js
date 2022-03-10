@@ -10,19 +10,31 @@ function build_private_api_stockx_search_router(mongoose_instance,config){
     .route("/")
     .post(
         checkSchema({
-            search_query:{
+            urlKey:{
                 in:["body"],
                 trim:true,
                 isEmpty:{
                     negated:true,
-                    errorMessage:"empty query",
+                    errorMessage:"empty",
                     bail:true,
                 },
                 isString:{
-                    errorMessage:"query must be a string",
+                    errorMessage:"not a string",
                 },
-                errorMessage:"invalid query",
-            }  
+                errorMessage:"invalid",
+            },
+            sizes:{
+                in:["body"],
+                isEmpty:{
+                    negated:true,
+                    errorMessage:"empty",
+                    bail:true,
+                },
+                isArray:{
+                    errorMessage:"not an Array",
+                },
+                errorMessage:"invalid",
+            }
         }),
         (req,res,next)=>{
 
@@ -30,11 +42,11 @@ function build_private_api_stockx_search_router(mongoose_instance,config){
             if(req_errors.length !== 0){
                 next({
                     expected:true,
-                    message:req_errors[0].msg
+                    message:`${req_errors[0].msg}, field: ${req_errors[0].param}`
                 })
             }
 
-            config.stockx_api.search(req.body.search_query)
+            config.stockx_api.get_product_specific_sizing(req.body.sizes,req.body.urlKey)
             .then((response)=>{
                 res.status(200).send({
                     data:response
