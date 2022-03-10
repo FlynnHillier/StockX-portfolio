@@ -9,7 +9,8 @@ axios.defaults.headers.common = {
 
 axios.defaults.baseURL = "https://stockx.com/"
 
-const currency = "GBP"
+const currencyCode = "GBP"
+const countryCode = "GB"
 
 
 
@@ -26,7 +27,7 @@ function search_item(search_term,max_results=4){
             "/api/browse",
             {
                 params:{
-                    currency: currency,
+                    currency: currencyCode,
                     _search: search_term,
                     dataType: "product",
                 }
@@ -80,12 +81,26 @@ function search_item(search_term,max_results=4){
 
 
 
-function get_product_pricing_info(product_urlKey){
+function get_product_info(product_urlKey){
     return new Promise((resolves,rejects)=>{
         
-        axios.get(
-            `/${product_urlKey}`
-        )
+        axios({
+            url:"https://stockx.com/p/e",
+            method:"post",
+            data:{
+                    operationName: "GetProduct",
+                    query:"query GetProduct($id: String!, $currencyCode: CurrencyCode, $countryCode: String!, $marketName: String) {  product(id: $id) { id listingType urlKey media { imageUrl } ...LastSale_Bid_Ask } } fragment LastSale_Bid_Ask on Product { variants { id traits { size } market(currencyCode: $currencyCode) { bidAskData(country: $countryCode, market: $marketName) { highestBid lowestAsk } salesInformation { volatility lastSale changeValue changePercentage } } } }",
+                    variables:{
+                        countryCode: countryCode,
+                        currencyCode: currencyCode,
+                        id: product_urlKey
+                    }
+            },
+            headers:{
+                    "apollographql-client-name": "Iron",
+                    "apollographql-client-version": "2022.02.27.01",
+            }
+        })
         .then((result)=>{
             if(result.status !== 200){
                 rejects({
@@ -93,45 +108,115 @@ function get_product_pricing_info(product_urlKey){
                 })
             }
 
-            const $ = cheerio.load(result.data)
-
-            try {
-            var offers = JSON.parse($($('script[type="application/ld+json"]')[3]).html()).offers
-            } catch(err){
-                rejects({
-                    error:error,
-                    reason:"parse error of expected offers content",
-                })
-            }
-            
-            let response = []
-            for(let offer of offers.offers){
-                response.push({
-                    size:offer.description,
-                    ask:offer.price
-                })
-            }
-
-            resolves(response)
+            resolves(result.data.data.product)
         })
         .catch((error)=>{
             rejects({
-                reason:"axios error",
-                error:error
+                error:error,
+                reason:"axios failure"
             })
         })
     })
 }
 
 
+function get_product_specific_sizing(sizes=[],urlKey){
+    return new Promise((resolves,rejects)=>{
+        
+        for(let size of sizes){
+            if(Number.isNaN(size)){
+                throw 'size must be an valid number'
+            } else{
+                if(size % 0.5 !== 0){
+                    throw 'size must be an valid multiple of 0.5 (full size / half size)'
+                }
+            }
+        }
+        
+        
+        get_product_info(urlKey)
+        .then((data)=>{
 
-get_product_pricing_info("adidas-yeezy-500-clay-brown").then((result)=>{
-    console.log(result)
-}).catch((err)=>{
-    console.error(err)
-})
+            let response = {
+                imageURL:data.media.imageUrl,
+                listingType:data.listingType,
+                sizes:{
+
+                }
+            }
+
+            for(let size of sizes){
+
+                let size_info = data.variants.find((variant) => variant.traits.size == size)
+                
+                if(size_info === undefined){
+                    response.sizes[size] = {
+                        exists:false
+                    }
+                }
+                else{
+                    response.sizes[size] = {
+                        exists:true,
+                        id:size_info.id,
+                        lowestAsk:size_info.market.bidAskData.lowestAsk,
+                        highestBid:size_info.market.bidAskData.highestBid,
+                        lastSale:size_info.market.salesInformation.lastSale,
+                        lastSale_changePercentage:size_info.market.salesInformation.changePercentage,
+                        lastSale_changeValue:size_info.market.salesInformation.changeValue,
+                        salesVolatility:size_info.market.salesInformation.volatility
+                    }
+                }
+            }
+
+            resolves(response)
+        })
+        .catch((error)=>{
+            rejects((error))
+        })
+    })
+}
+
+
+
+
+
+
+//**TESTING**
+
+// search_item("mummy dunk").then((result)=>{
+
+//     get_product_specific_sizing([7,9,20],result[0].urlKey)
+//     .then((data)=>{
+//         console.log(data)
+//     })
+//     .catch((error)=>{
+//         console.error(error)
+//     })
+//     console.log(result)
+// })
+// .catch((err)=>{
+//     console.error(err)
+// })
+
+
+
+// // get_product_specific_sizing([7,9,20],"air-jordan-6-retro-unc-white")
+// // .then((data)=>{
+// //     console.log(data)
+// // })
+// // .catch((error)=>{
+// //     console.error(error)
+// })
+
+
+
+
+
+
 
 
 module.exports = {
-    search:search_item
+    search:search_item,
+    get_product_info:get_product_info,
+    get_product_specific_sizing:get_product_specific_sizing
 }
