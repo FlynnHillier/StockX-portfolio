@@ -11,7 +11,24 @@ function build_auth_signup_router(mongoose_instance,config){
             config.mongo.mongoose_models.user.create({
                 email:email,
                 password:bcrypt.hashSync(password_plainText,config.mongo.user_creation.salt_rounds),
-                authKey:authKey
+                authKey:authKey,
+                stock:{
+                    stats:{
+
+                    },
+                    current:[
+                            {
+                                urlKey:"bob",
+                                sizes:[
+                                    {
+                                        size:10.5,
+                                        quantity:4,
+                                    }
+                                ]
+                            }
+                            ]
+
+                }
             }).then((result)=>{
                 resolve()
             }).catch((error)=>{
@@ -39,9 +56,14 @@ function build_auth_signup_router(mongoose_instance,config){
                 charset:"alphabetic"
             })
     
-            config.mongo.mongoose_models.user.findOne({
+            config.mongo.mongoose_models.user.findOne(
+                {
                 authKey:genned_key
-            }).then((result)=>{
+                },
+                {
+                    authKey:1
+                }
+            ).then((result)=>{
                 if(result === null){
                     resolve(genned_key)
                 } else{
@@ -84,11 +106,15 @@ function build_auth_signup_router(mongoose_instance,config){
                 .then((genned_authKey)=>{
                     
 
-                    config.mongo.mongoose_models.user.findOne({
-                        email:req.body.email
-                    })
+                    config.mongo.mongoose_models.user.findOne(
+                        {
+                            email:req.body.email
+                        },
+                        {
+                            email:1
+                        }
+                    )
                     .then((found_result)=>{
-
                         if(found_result === null){
                             create_user(req.body.email,req.body.password,genned_authKey)
                             .then(()=>{
@@ -101,6 +127,9 @@ function build_auth_signup_router(mongoose_instance,config){
                                     next:undefined,
                                 })
 
+                            })
+                            .catch((err)=>{
+                                next(err)
                             })
                         }
 
