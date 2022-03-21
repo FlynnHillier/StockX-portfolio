@@ -7,7 +7,7 @@ const schema = mongoose.Schema
 
 
 
-const sizes_schema = new schema({
+const size_schema = new schema({
     _id:false,
     size:{
         required:true,
@@ -21,7 +21,7 @@ const sizes_schema = new schema({
             message:"Not a valid size (must be multiple of 0.5)"
         }
     },
-    quantity:{
+    qty:{
         type:Number,
         min:0,
         default:0,
@@ -32,43 +32,20 @@ const sizes_schema = new schema({
 })
 
 
-
-const shoe_schema = new schema({
+const stock_item_schema = new schema({
+    required:false,
+    sizes:[size_schema],
     urlKey:{
         type:String,
         required:true,
-        default:"__URL KEY__"
-    },
-    sizes:{
-        type:[sizes_schema],
-        required:true,
-        default:[]
-    },
-    title:{
-        type:String,
-        required:true,
-        default:"__SHOE TITLE__"
-    },
-    imageURL:{
-        type:String,
-        required:true,
-        default:"https://www.google.com"
-    },
-    color:{
-        type:String,
-        required:true,
-        default:"__COLOR__",
     }
-
-
-
 })
 
 
 
 
-
 const stock_schema = new schema({
+    _id:false,
     stats:{
         totalValue:{
             type:Number,
@@ -83,13 +60,18 @@ const stock_schema = new schema({
     },
     current:{
         required:true,
-        type:[shoe_schema],
+        default:[],
+        type:[stock_item_schema]
+
+
+
     },
     sold:{
         required:true,
-        type:[shoe_schema]
-    },
-    _id:false,
+        default:[],
+        type:[stock_item_schema]
+
+    }
 })
 
 
@@ -115,6 +97,28 @@ mongoose_models = {
     })),
 
 
+    shoe:model("shoe",new schema({
+        _id:{ //Should be urlKey
+            type:String,
+            required:true,
+            default:"__URL KEY__"
+        },
+        title:{
+            type:String,
+            required:true,
+            default:"__SHOE TITLE__"
+        },
+        imageURL:{
+            type:String,
+            required:true,
+            default:"https://www.google.com"
+        },
+        color:{
+            type:String,
+            required:true,
+            default:"__COLOR__",
+        }
+    }))
 
 }
 

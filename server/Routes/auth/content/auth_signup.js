@@ -12,29 +12,16 @@ function build_auth_signup_router(mongoose_instance,config){
                 email:email,
                 password:bcrypt.hashSync(password_plainText,config.mongo.user_creation.salt_rounds),
                 authKey:authKey,
-                stock:{
-                    stats:{
-
-                    },
-                    current:[
-                            {
-                                urlKey:"bob",
-                                sizes:[
-                                    {
-                                        size:10.5,
-                                        quantity:4,
-                                    }
-                                ]
-                            }
-                            ]
-
-                }
-            }).then((result)=>{
+                stock:{}
+            })
+            .then((result)=>{
                 resolve()
-            }).catch((error)=>{
+            })
+            .catch((error)=>{
                 reject( {
                     expected:false,
-                    message:"unable to create user"
+                    message:"unable to create user",
+                    error:error
                 })
             })
 

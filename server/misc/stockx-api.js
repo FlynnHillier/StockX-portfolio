@@ -208,12 +208,12 @@ function get_product_specific_sizing(sizes=[],urlKey){
 
 
 
-// // get_product_specific_sizing([7,9,20],"air-jordan-6-retro-unc-white")
-// // .then((data)=>{
-// //     console.log(data)
-// // })
-// // .catch((error)=>{
-// //     console.error(error)
+// get_product_specific_sizing([7,9,20],"air-jordan-6-retro-unc-white")
+// .then((data)=>{
+//     console.log(data)
+// })
+// .catch((error)=>{
+//     console.error(error)
 // })
 
 
