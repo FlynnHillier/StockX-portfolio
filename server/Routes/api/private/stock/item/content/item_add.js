@@ -31,7 +31,7 @@ function build_api_private_stock_item_add(mongoose_instance,config){
                 }
             )
             .then((result)=>{
-                resolve()
+                resolve(result)
             })
             .catch((error)=>{
                 reject({
@@ -73,7 +73,7 @@ function build_api_private_stock_item_add(mongoose_instance,config){
                 }
             )
             .then((result)=>{
-                resolve()
+                resolve(result)
             })
             .catch((error)=>{
                 reject({
@@ -111,7 +111,7 @@ function build_api_private_stock_item_add(mongoose_instance,config){
                 }
             )
             .then((result)=>{
-                resolve()
+                resolve(result)
             })
             .catch((error)=>{
                 reject({
@@ -134,10 +134,13 @@ function build_api_private_stock_item_add(mongoose_instance,config){
                 for(let size_info_obj of size_qty_arr){
                     add_new_size_to_item(authKey,urlKey,size_info_obj.size)
                     .then((result)=>{
-                        inc_item_size_qty(authKey,urlKey,size_info_obj.size,size_info_obj.qty)
-                        .catch((error)=>{
-                            reject(error)
-                        })
+                        
+                        if(size_info_obj.qty !== 0){
+                            inc_item_size_qty(authKey,urlKey,size_info_obj.size,size_info_obj.qty)
+                            .catch((error)=>{
+                                reject(error)
+                            })
+                        }
 
                     })
                     .catch((error)=>{
@@ -227,7 +230,10 @@ function build_api_private_stock_item_add(mongoose_instance,config){
 
             add_item(req.session.authKey,req.body.urlKey,req.body.sizes)
             .then((result)=>{
-                res.status(200).send("done added!")
+                res.status(200).send({
+                    result:true,
+                    message:"successfully added item(s) to user's stock."
+                })
             })
             .catch((error)=>{
                 next(error)
