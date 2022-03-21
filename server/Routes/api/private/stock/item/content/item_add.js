@@ -208,6 +208,10 @@ function build_api_private_stock_item_add(mongoose_instance,config){
                             return false
                         }  
 
+                        if(sizes_array.find((elem) => elem.qty < 0) !== undefined){
+                            return false
+                        }
+
                         return true
                     }   
                 },
