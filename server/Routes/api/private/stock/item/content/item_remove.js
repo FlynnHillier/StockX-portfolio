@@ -187,7 +187,15 @@ function build_api_private_stock_item_remove(mongoose_instance,config){
     .route("/")
     .post(
         checkSchema({
-            urlKey:{
+            updates:{
+                isArray:true,
+                isEmpty:{
+                    negated:true,
+                    errorMessage:"updates cannot be empty"
+                },
+                errorMessage:"invalid"
+            },
+            "updates.*.urlKey":{
                 in:["body"],
                 trim:true,
                 isEmpty:{
@@ -200,7 +208,7 @@ function build_api_private_stock_item_remove(mongoose_instance,config){
                 },
                 errorMessage:"invalid",
             },
-            sizes:{
+            "updates.*.sizes":{
                 in:["body"],
                 isEmpty:{
                     negated:true,
@@ -227,8 +235,8 @@ function build_api_private_stock_item_remove(mongoose_instance,config){
                         return true
                     }   
                 },
-                errorMessage:"invalid",
-            }
+        
+            },
         }),
         (req,res,next)=>{
             const req_errors = validationResult(req).errors
@@ -242,15 +250,25 @@ function build_api_private_stock_item_remove(mongoose_instance,config){
 
 
             
-            decrease_item_qty(req.session.authKey,req.body.urlKey,req.body.sizes)
-            .then((result)=>{
+            let promises = []
+            for (let update of req.body.updates){                
+                promises.push(decrease_item_qty(req.session.authKey,update.urlKey,update.sizes))
+
+            }
+            
+            Promise.all(promises)
+            .then((_)=>{
                 res.status(200).send({
                     result:true,
-                    message:"successfully removed item(s) from user's stock",
+                    message:"Successfully removed item(s) from user's stock"
                 })
             })
             .catch((error)=>{
-                next(error)
+                next({
+                    expected:false,
+                    message:"mongo error removing from user's stock",
+                    error:error
+                })
             })
 
             
