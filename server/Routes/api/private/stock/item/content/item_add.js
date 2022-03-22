@@ -7,7 +7,7 @@ function build_api_private_stock_item_add(mongoose_instance,config){
 
 
 
-    function add_new_item_to_user(authKey,urlKey){
+    function add_new_item_to_user(authKey,urlKey,title,imageURL,colour){
         return new Promise((resolve,reject)=>{
         
             config.mongo.mongoose_models.user.updateOne(
@@ -25,7 +25,10 @@ function build_api_private_stock_item_add(mongoose_instance,config){
                     "$addToSet":{
                         "stock.current":{
                             urlKey:urlKey,
-                            sizes:[]
+                            sizes:[],
+                            title:title,
+                            imgURL:imageURL,
+                            colour:colour
                         }
                     }
                 }
@@ -125,10 +128,10 @@ function build_api_private_stock_item_add(mongoose_instance,config){
 
 
 
-    function add_item(authKey,urlKey,size_qty_arr){
+    function add_item(authKey,urlKey,size_qty_arr,title,imageURL,colour){
         return new Promise((resolve,reject)=>{
 
-           add_new_item_to_user(authKey,urlKey)
+           add_new_item_to_user(authKey,urlKey,title,imageURL,colour)
            .then((result)=>{
 
                 for(let size_info_obj of size_qty_arr){
@@ -204,6 +207,7 @@ function build_api_private_stock_item_add(mongoose_instance,config){
                         },
                         isArray:{
                             errorMessage:"not an Array",
+                            bail:true,
                         },
                         custom:{
                             options:function(sizes_array){
@@ -222,7 +226,39 @@ function build_api_private_stock_item_add(mongoose_instance,config){
                                 return true
                             }   
                         },
-                
+                    },
+                    "updates.*.imgURL":{
+                        isEmpty:{
+                            negated:true,
+                            errorMessage:"empty",
+                            bail:true,
+                        },
+                        isURL:{
+                            errorMessage:"not URL",
+                            bail:true,
+                        },  
+                    },
+                    "updates.*.title":{
+                        isEmpty:{
+                            negated:true,
+                            errorMessage:"empty",
+                            bail:true,
+                        },
+                        isString:{
+                            errorMessage:"not string",
+                            bail:true,
+                        },  
+                    },
+                    "updates.*.colour":{
+                        isEmpty:{
+                            negated:true,
+                            errorMessage:"empty",
+                            bail:true,
+                        },
+                        isString:{
+                            errorMessage:"not string",
+                            bail:true,
+                        },  
                     },
         }),
         async (req,res,next)=>{
@@ -238,7 +274,7 @@ function build_api_private_stock_item_add(mongoose_instance,config){
 
             let promises = []
             for (let update of req.body.updates){                
-                promises.push(add_item(req.session.authKey,update.urlKey,update.sizes))
+                promises.push(add_item(req.session.authKey,update.urlKey,update.sizes,update.title,update.imgURL,update.colour))
 
             }
             

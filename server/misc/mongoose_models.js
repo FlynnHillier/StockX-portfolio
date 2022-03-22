@@ -1,5 +1,8 @@
 
 const mongoose = require("mongoose")
+const Url = require("mongoose-type-url")
+require('mongoose-type-url')
+
 
 
 const model = mongoose.model
@@ -34,11 +37,25 @@ const size_schema = new schema({
 
 const stock_item_schema = new schema({
     required:false,
-    sizes:[size_schema],
     urlKey:{
         type:String,
         required:true,
-    }
+    },
+    title:{
+        type:String,
+        required:true,
+        default:"__SHOE TITLE__"
+    },
+    colour:{
+        type:String,
+        required:true,
+        default:"__COLOUR__"
+    },
+    imgURL:{
+        type:Url,
+        required:true,
+    },
+    sizes:[size_schema],
 })
 
 
@@ -95,30 +112,6 @@ mongoose_models = {
         },
         stock:stock_schema
     })),
-
-
-    shoe:model("shoe",new schema({
-        _id:{ //Should be urlKey
-            type:String,
-            required:true,
-            default:"__URL KEY__"
-        },
-        title:{
-            type:String,
-            required:true,
-            default:"__SHOE TITLE__"
-        },
-        imageURL:{
-            type:String,
-            required:true,
-            default:"https://www.google.com"
-        },
-        color:{
-            type:String,
-            required:true,
-            default:"__COLOR__",
-        }
-    }))
 
 }
 
