@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Container,Row,Col } from 'react-bootstrap'
+import { Container } from 'react-bootstrap'
 
 import './StyleSheets/headnotes.css'
 
