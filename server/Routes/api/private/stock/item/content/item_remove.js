@@ -141,7 +141,7 @@ function build_api_private_stock_item_remove(mongoose_instance,config){
                             if(result.stock.current.find((item)=> item.urlKey === urlKey).sizes.length === 0){
                                 remove_user_stock_item(authKey,urlKey)
                                 .then((result)=>{
-                                    resolve() //shouldn't really happen unless last itteration of for loop
+                                    resolve() //shouldn't really happen unless last itteration of for loop ( if it does means non existant sizes were passed)
                                 })
                                 .catch((error)=>{
                                     reject({

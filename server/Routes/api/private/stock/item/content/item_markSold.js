@@ -1,6 +1,8 @@
 const path = require("path")
 const express = require("express")
 const { checkSchema , validationResult } = require("express-validator")
+const req = require("express/lib/request")
+const { resolve } = require("path")
 
 function build_api_private_stock_item_markSold(mongoose_instance,config){
     const api_private_stock_item_markSold = express.Router()
@@ -233,6 +235,7 @@ function build_api_private_stock_item_markSold(mongoose_instance,config){
                     new Promise((resolve,reject)=>{
 
                         if(item.sizes.length === 1){
+
                             //**Remove item **/
                             config.mongo.mongoose_models.user.findOneAndUpdate(
                                 {//query
@@ -406,124 +409,103 @@ function build_api_private_stock_item_markSold(mongoose_instance,config){
 
 
     function mark_item_sold(authKey,urlKey,size_qty_obj_arr){
-        return new Promise((resolve,reject)=>{
+        return new Promise(async (resolve,reject)=>{
 
-
-            let promises = []
+            let sizes_for_markSold = []
 
 
             for(let size_obj of size_qty_obj_arr){
 
                 let size = size_obj.size
-                let qty = size_obj.qty
 
-                promises.push(
-                    new Promise((resolve,reject)=>{
-                        current_stock_decrease_AIO(authKey,urlKey,size,qty)
-                        .then((item_decrease_result)=>{
+                let req_size_obj = sizes_for_markSold.find((req_size_obj)=>req_size_obj.size === size)
+                if(req_size_obj !== undefined){
+                    req_size_obj.qty += size_obj.qty
+                } else{
+                    sizes_for_markSold.push(size_obj)
+                }
 
-                            if(item_decrease_result.result === false){
-                                resolve(
-                                    {
-                                        result:false,
-                                        message:`false result during removal of current stock, thrown message: '${item_decrease_result.message}'`
-                                    }
-                                )
-                            }
 
-                            if(item_decrease_result.result === true){
 
-                                qty = item_decrease_result.details.was_decrease_overflow ? qty - item_decrease_result.details.decrease_overflow_val : qty
-
-                                add_item(
-                                    authKey,
-                                    urlKey,
-                                    [
-                                        {
-                                            size:size,
-                                            qty:qty
-                                        }
-                                    ],
-                                    item_decrease_result.affected_item_details.title,
-                                    item_decrease_result.affected_item_details.imgURL,
-                                    item_decrease_result.affected_item_details.colour
-                                )
-                                .then((_)=>{
-                                    resolve(
-                                        {
-                                            result:true,
-                                            message:"successfully marked item as sold"
-                                        }
-                                    )
-                                })
-                                .catch((error)=>{
-                                    reject(
-                                        {
-                                            expected:false,
-                                            message:"error adding item to sold stock list (ITEM WAS REMOVED FROM CURRENT STOCK)",
-                                            error:error
-                                        }
-                                    )
-                                })
-
-                            }
-
-                        })
-                        .catch((error)=>{
-                            reject(
-                                {
-                                    expected:false,
-                                    message:"error during mark sold, removing item from users current stock",
-                                    error:error
-                                }
-                            )
-                        })
-                    })
-                )
             }
 
 
+            for(let size_obj of sizes_for_markSold){
 
-            Promise.all(promises)
-            .then((_)=>{
-                resolve(
-                    {
-                        result:true,
-                    }
-                )
-            })
-            .catch((error)=>{
-                reject(
-                    {
-                        expected:false,
-                        message:"error during mark sold",
-                        error:error
-                    }
-                )
-            })
+                let size = size_obj.size
+                let qty = size_obj.qty
+
+                const result = await new Promise((resolve,reject)=>{
+                    current_stock_decrease_AIO(authKey,urlKey,size,qty)
+                    .then((item_decrease_result)=>{
+
+                        if(item_decrease_result.result === false){
+                            resolve(
+                                {
+                                    result:false,
+                                    message:`false result during removal of current stock, thrown message: '${item_decrease_result.message}'`
+                                }
+                            )
+                        }
+
+                        if(item_decrease_result.result === true){
+
+                            qty = item_decrease_result.details.was_decrease_overflow ? qty - item_decrease_result.details.decrease_overflow_val : qty
+
+                            add_item(
+                                authKey,
+                                urlKey,
+                                [
+                                    {
+                                        size:size,
+                                        qty:qty
+                                    }
+                                ],
+                                item_decrease_result.affected_item_details.title,
+                                item_decrease_result.affected_item_details.imgURL,
+                                item_decrease_result.affected_item_details.colour
+                            )
+                            .then((_)=>{
+                                resolve(
+                                    {
+                                        result:true,
+                                        message:"successfully marked item as sold",
+                                        details:item_decrease_result
+                                    }
+                                )
+                            })
+                            .catch((error)=>{
+                                reject(
+                                    {
+                                        expected:false,
+                                        message:"error adding item to sold stock list (ITEM WAS REMOVED FROM CURRENT STOCK)",
+                                        error:error
+                                    }
+                                )
+                            })
+
+                        }
+
+                    })
+                    .catch((error)=>{
+                        reject(
+                            {
+                                expected:false,
+                                message:"error during mark sold, removing item from users current stock",
+                                error:error
+                            }
+                        )
+                    })
+                })
+                .catch((error)=>{
+                    reject(error)
+                })
+
+            }
+
+            resolve()
         })
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     api_private_stock_item_markSold
@@ -583,24 +565,6 @@ function build_api_private_stock_item_markSold(mongoose_instance,config){
         }),
         (req,res,next)=>{
             
-
-            // let update = req.body.updates[0]
-
-            // let urlkey = update.urlKey
-            // let size_obj = update.sizes[0]
-
-
-            // mark_item_sold(req.session.authKey,urlkey,size_obj.size,size_obj.qty)
-            // .then((result)=>{
-            //     console.log("success")
-            //     console.log(result)
-            //     res.status(200).send(result)
-            // })
-            // .catch((err)=>{
-            //     next(err)
-            // })
-
-
             let promises = []
             for (let update of req.body.updates){                
                 promises.push(mark_item_sold(req.session.authKey,update.urlKey,update.sizes))
