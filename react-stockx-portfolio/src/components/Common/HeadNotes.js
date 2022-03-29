@@ -28,7 +28,7 @@ const HeadNotes = ({elements}) => {
 }
 
 HeadNotes.propTypes = {
-
+    
 }
 
 export default HeadNotes

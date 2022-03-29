@@ -1,4 +1,6 @@
-import React from 'react'
+import React, {useContext} from 'react'
+import AuthContext from '../../context/AuthProvider'
+
 import PropTypes from 'prop-types'
 import {Container,Row,Col} from 'react-bootstrap'
 import Title from './Title'
@@ -7,18 +9,23 @@ import HeadNotes from './HeadNotes'
 
 
 const Header = () => {
+  
+  const {email, auth_state} = useContext(AuthContext)
+
+  
+  const headNotes = auth_state ? [<a href='/logout'>logout</a>,email] : [<a href="/login">login</a>]
+
+
+
   return (
    <Container fluid className="bg-dark">
        
        <Row className='gx-0 px-3'>
           <Col xs={10}>
-            <Title title="StockX portfolio App"></Title>
+            <Title title="Lokker"></Title>
           </Col>
           <Col xs={2}>
-              <HeadNotes elements={[
-                  <a href="/login"> login </a>,
-                  <p> username</p>
-              ]}/>
+              <HeadNotes elements={headNotes}/>
           </Col>
        </Row>
        
@@ -28,17 +35,22 @@ const Header = () => {
               [
               {
                 active:false,
-                url:"/login",
+                urlPath:"/login",
+                name:"po"
+              },
+              {
+                active:false,
+                urlPath:"/login",
                 name:"login"
               },
               {
                 active:false,
-                url:"/signup",
+                urlPath:"/signup",
                 name:"signup"
               },
               {
                 active:true,
-                url:"/",
+                urlPath:"/",
                 name:"dashboard"
               }
             ]

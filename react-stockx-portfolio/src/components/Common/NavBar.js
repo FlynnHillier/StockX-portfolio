@@ -12,10 +12,10 @@ import './StyleSheets/navbar.css'
 const NavBar = ({components}) => {
   return (
     <Nav
-        activeKey={components.find((component)=> component.active === true).url}
-        onSelect={(selectedKey) => {
-            alert(selectedKey)
-        }}
+        activeKey={components.find((component)=> component.urlPath === window.location.pathname)}
+        // onSelect={(selectedKey) => {
+        //     window.location.replace(selectedKey.urlPath)
+        // }}
 
         className="border-top border-bottom border-1 border-secondary ps-2"
     >
@@ -24,7 +24,7 @@ const NavBar = ({components}) => {
         {components.map((component) => {
             return (
             <Nav.Item key={component.name}>
-                <Nav.Link href={component.url} > {component.name} </Nav.Link>
+                <Nav.Link href={component.urlPath} > {component.name} </Nav.Link>
             </Nav.Item>
             )
         })}
@@ -36,7 +36,7 @@ const NavBar = ({components}) => {
 
 NavBar.propTypes = {
     components:PropTypes.arrayOf(PropTypes.shape({
-        url:urlPropType.isRequired,
+        urlPath:urlPropType.isRequired,
         name:PropTypes.string.isRequired
     })),
 }
