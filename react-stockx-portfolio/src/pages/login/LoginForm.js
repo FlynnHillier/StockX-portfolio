@@ -4,6 +4,8 @@ import PropTypes from 'prop-types'
 
 import { Container,Row,Col } from 'react-bootstrap'
 
+import { Link } from 'react-router-dom'
+
 import axios from "axios"
 const LOGIN_URL = "/auth/login"
 
@@ -41,11 +43,12 @@ const LoginForm = ({}) => {
       if(response.result === true){
         setEmail(local_email)
         setAuth_state(true)
-        console.log("valid")
+        window.location.replace("/")
       }
 
       if(response.result === false){
         console.log("not valid")
+        window.location.replace("/hi")
       }
 
     } catch(error){

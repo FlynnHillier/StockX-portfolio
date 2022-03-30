@@ -1,6 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import "./StyleSheets/title.css"
+
 import { Container,Row,Col} from 'react-bootstrap'
 
 

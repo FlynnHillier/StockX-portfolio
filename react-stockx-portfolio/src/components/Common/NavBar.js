@@ -1,10 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import urlPropType from 'url-prop-type';
-
 import { Nav } from 'react-bootstrap'
-
 import './StyleSheets/navbar.css'
+
+
+import { Link } from 'react-router-dom';
 
 
 
@@ -13,9 +14,6 @@ const NavBar = ({components}) => {
   return (
     <Nav
         activeKey={components.find((component)=> component.urlPath === window.location.pathname)}
-        // onSelect={(selectedKey) => {
-        //     window.location.replace(selectedKey.urlPath)
-        // }}
 
         className="border-top border-bottom border-1 border-secondary ps-2"
     >
@@ -24,7 +22,7 @@ const NavBar = ({components}) => {
         {components.map((component) => {
             return (
             <Nav.Item key={component.name}>
-                <Nav.Link href={component.urlPath} > {component.name} </Nav.Link>
+                <Nav.Link as={Link} to={component.urlPath} > {component.name} </Nav.Link>
             </Nav.Item>
             )
         })}

@@ -1,6 +1,9 @@
 import React, {useContext} from 'react'
 import AuthContext from '../../context/AuthProvider'
 
+import "./StyleSheets/header.css"
+
+
 import PropTypes from 'prop-types'
 import {Container,Row,Col} from 'react-bootstrap'
 import Title from './Title'
@@ -18,7 +21,7 @@ const Header = () => {
 
 
   return (
-   <Container fluid className="bg-dark">
+   <Container fluid className="header bg-dark">
        
        <Row className='gx-0 px-3'>
           <Col xs={10}>

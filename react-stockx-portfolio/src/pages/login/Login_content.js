@@ -1,13 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Container,Row,Col} from 'react-bootstrap'
-import './../styles.css'
 
-import LoginForm from './BodyContent/LoginForm'
+import {Container,Row,Col} from "react-bootstrap"
+import LoginForm from './LoginForm'
 
-
-
-const Body = () => {
+const login_content = props => {
   return (
     <Container fluid className="body bg-light text-dark px-2 pt-1">
         
@@ -29,6 +26,6 @@ const Body = () => {
   )
 }
 
-Body.propTypes = {}
+login_content.propTypes = {}
 
-export default Body
+export default login_content
