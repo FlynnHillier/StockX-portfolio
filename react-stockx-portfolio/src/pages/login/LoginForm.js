@@ -6,11 +6,11 @@ import { Container,Row,Col } from 'react-bootstrap'
 
 import { Link } from 'react-router-dom'
 
-import axios from "axios"
+import axios from "./../../api/axios"
 const LOGIN_URL = "/auth/login"
 
 
-const LoginForm = ({}) => {
+const LoginForm = () => {
   const { setAuth_state , setEmail } = useContext(AuthContext)
   
   let [password,setPassword] = useState("")
@@ -20,15 +20,11 @@ const LoginForm = ({}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    setAuth_state(true)
-    setEmail(local_email)
-
 
     try {
 
       const response = await axios.post(
-        "http://localhost:5000/auth/login",
+        LOGIN_URL,
         JSON.stringify({
           email:local_email,
           password:password
@@ -40,16 +36,12 @@ const LoginForm = ({}) => {
         }
       )
 
-      if(response.result === true){
-        setEmail(local_email)
-        setAuth_state(true)
-        window.location.replace("/")
-      }
+      setAuth_state(response.data.result)
+      const email = response.data.result ? local_email : ""
+      setEmail(email)
 
-      if(response.result === false){
-        console.log("not valid")
-        window.location.replace("/hi")
-      }
+      console.log("context set")
+
 
     } catch(error){
       console.error(error)
@@ -96,7 +88,7 @@ const LoginForm = ({}) => {
         <button
           className='btn btn-primary my-1'
         > 
-        {"Sign In"}
+        Sign in
         </button>
 
       </form>
@@ -104,10 +96,7 @@ const LoginForm = ({}) => {
       <p>
         New user?
         <br/>
-        <span className='line'>
-          {/* react router link here */}
-          <a href="#">Sign Up </a>
-        </span>
+        <Link to="/signup"></Link>
       </p>
     
     

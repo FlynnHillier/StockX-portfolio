@@ -1,5 +1,9 @@
-import axios from 'axios'
+import {axios as axios_lib} from 'axios'
 
-export default axios.create({
-    baseURL:"http://localhost:5000"
-})
+const axios = axios_lib.create(
+    {
+        baseURL:"http://localhost:5000"
+    }
+)
+
+export default axios

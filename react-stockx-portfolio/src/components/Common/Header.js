@@ -39,11 +39,6 @@ const Header = () => {
               {
                 active:false,
                 urlPath:"/login",
-                name:"po"
-              },
-              {
-                active:false,
-                urlPath:"/login",
                 name:"login"
               },
               {

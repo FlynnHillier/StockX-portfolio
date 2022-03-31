@@ -3,9 +3,9 @@ import './styles.css';
 import Header from './components/Common/Header'
 
 
-import Login_content from './pages/login/Login_content';
+import { BrowserRouter} from "react-router-dom"
 
-import { BrowserRouter,Routes,Route,Link} from "react-router-dom"
+import Views from './Views';
 
 
 
@@ -14,11 +14,7 @@ function App() {
     <>
       <BrowserRouter>
         <Header title="Lokker"/>
-        <Routes>
-          <Route path="/login" element={<Login_content/>} />
-
-
-        </Routes>
+        <Views/>
       </BrowserRouter>
     </>
   );
