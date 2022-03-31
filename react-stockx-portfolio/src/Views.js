@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import ProtectedRoutes from "./ProtectedRoutes"
 
 import LoginContent from "./pages/login/LoginContent"
-
+import SignupContent from "./pages/signup/SignupContent"
 
 
 
@@ -13,9 +13,10 @@ const Views = () => {
   return (
     <Routes>
           <Route path="/" element={<ProtectedRoutes/>}>
-            <Route path="signup" element={<>YO this is signup</>}/>
+            <Route path="signup" element={<SignupContent/>}/>
             <Route path="bye" element={<>This is bye</>}/>
           </Route>
+          <Route path="/" element={<>This is home</>} />
           <Route path="/" element={<>This is home</>} />
           <Route path="/login" element={<LoginContent/>}/>
           <Route path="/*" element={<>Page not found</>}/>
