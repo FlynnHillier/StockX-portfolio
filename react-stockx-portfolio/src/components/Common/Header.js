@@ -3,6 +3,7 @@ import AuthContext from '../../context/AuthProvider'
 
 import "./StyleSheets/header.css"
 
+import { Link } from 'react-router-dom'
 
 import PropTypes from 'prop-types'
 import {Container,Row,Col} from 'react-bootstrap'
@@ -16,7 +17,7 @@ const Header = () => {
   const {email, auth_state} = useContext(AuthContext)
 
   
-  const headNotes = auth_state ? [<a href='/logout'>logout</a>,email] : [<a href="/login">login</a>]
+  const headNotes = auth_state ? [<Link to='/logout'>logout</Link>,email] : [<Link to="/login">login</Link>]
 
 
 

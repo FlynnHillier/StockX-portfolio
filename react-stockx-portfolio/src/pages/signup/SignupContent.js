@@ -1,12 +1,8 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-
-import { useState, useContext } from 'react'
+import React,{ useState, useContext } from 'react'
+import AuthContext from '../../context/AuthProvider'
 
 import {Container,Row,Col} from "react-bootstrap"
 import Form from '../../components/misc/Form'
-
-import AuthContext from '../../context/AuthProvider'
 
 import axios from "./../../api/axios"
 const SIGNUP_URL = "/auth/signup"
@@ -88,7 +84,5 @@ const SignupContent = () => {
     </Container>
   )
 }
-
-SignupContent.propTypes = {}
 
 export default SignupContent

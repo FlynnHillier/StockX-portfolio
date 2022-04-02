@@ -6,8 +6,10 @@ import { useState } from 'react';
 
 import { BrowserRouter} from "react-router-dom"
 
+import AuthContext from './context/AuthProvider';
+
 import Views from './Views';
-import SignupContent from './pages/signup/SignupContent';
+
 
 
 
@@ -17,12 +19,10 @@ function App() {
   const [email,setEmail] = useState("")
 
   return (
-    <>
       <BrowserRouter>
         <Header title="Lokker"/>
             <Views></Views>
       </BrowserRouter>
-    </>
   );
 }
 

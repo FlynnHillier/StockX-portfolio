@@ -3,22 +3,28 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import ProtectedRoutes from "./ProtectedRoutes"
+import OpenRoutes from "./OpenRoutes"
 
 import LoginContent from "./pages/login/LoginContent"
 import SignupContent from "./pages/signup/SignupContent"
 
+import AuthContext from './context/AuthProvider'
+import { useContext } from "react"
 
 
 const Views = () => {
+
+  let {auth_state} = useContext(AuthContext)
+
   return (
     <Routes>
-          <Route path="/" element={<ProtectedRoutes/>}>
+          <Route element={<OpenRoutes/>}>
             <Route path="signup" element={<SignupContent/>}/>
-            <Route path="bye" element={<>This is bye</>}/>
+            <Route path="login" element={<LoginContent/>}/>
           </Route>
-          <Route path="/" element={<>This is home</>} />
-          <Route path="/" element={<>This is home</>} />
-          <Route path="/login" element={<LoginContent/>}/>
+          <Route  element={<ProtectedRoutes/>}>
+            <Route path="/priv" element={<>This is bye</>}/>
+          </Route>
           <Route path="/*" element={<>Page not found</>}/>
     </Routes>
   )

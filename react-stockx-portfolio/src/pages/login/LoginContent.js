@@ -1,6 +1,4 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import { useState,useContext } from 'react'
+import React,{ useState,useContext } from 'react'
 import AuthContext from '../../context/AuthProvider'
 
 import {Container,Row,Col} from "react-bootstrap"
@@ -86,7 +84,5 @@ const LoginContent = () => {
     </Container>
   )
 }
-
-LoginContent.propTypes = {}
 
 export default LoginContent
