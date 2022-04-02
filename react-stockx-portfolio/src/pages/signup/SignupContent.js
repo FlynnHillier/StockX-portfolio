@@ -8,12 +8,15 @@ import Form from '../../components/misc/Form'
 
 import AuthContext from '../../context/AuthProvider'
 
+import axios from "./../../api/axios"
+const SIGNUP_URL = "/auth/signup"
 
 
 const SignupContent = () => {
 
     const [email,local_setEmail] = useState("")
     const [password,setPassword] = useState("")
+    const [errorMessage,setErrorMessage] = useState("")
 
     const { setAuth_state , setEmail } = useContext(AuthContext)
 
@@ -27,11 +30,32 @@ const SignupContent = () => {
             <Col xl={4} lg={6} md={6} sm={8} xs={12}>
               
               <Form 
-                title="Test Form"
-                onSubmit={function(e){
+                ErrorMessageState={{
+                  state:errorMessage,
+                  setState:setErrorMessage
+                }}
+                title="Signup"
+                onSubmit={async (e)=>{
                     e.preventDefault()
-                    setAuth_state(true)
-                    setEmail(email)
+
+                    const response = await axios.post(
+                      SIGNUP_URL,
+                      {
+                        email:email,
+                        password:password,
+                      },
+                      {
+                        headers:{
+                          "Content-Type":"application/json"
+                        }
+                      }
+                    )
+                    
+
+                    setErrorMessage(response.data.result ? "" : response.data.message)
+                    setAuth_state(response.data.result)
+                    setEmail(response.data.result ? email : "")
+
                 }}
                 fields={[
                     {
@@ -50,6 +74,7 @@ const SignupContent = () => {
                     },
                     
                 ]}
+
               />
 
             </Col>
