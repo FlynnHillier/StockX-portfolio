@@ -3,6 +3,7 @@ import AuthContext from '../../context/AuthProvider'
 
 import {Container,Row,Col} from "react-bootstrap"
 import Form from "../../components/misc/Form"
+import { Link } from 'react-router-dom'
 
 import axios from "../../api/axios"
 
@@ -72,7 +73,14 @@ const LoginContent = () => {
                 }
               ]}
               submitButtonText="login"
-              />
+              >
+              <div>
+                New user?
+                <br></br>
+                <Link to="/signup">sign up</Link>
+
+              </div>
+            </Form>
             </Col>
             <Col>
             </Col>

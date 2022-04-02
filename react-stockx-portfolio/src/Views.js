@@ -1,23 +1,21 @@
-import { BrowserRouter,Route, Routes} from "react-router-dom"
+import { Route, Routes} from "react-router-dom"
 import React from 'react'
-import PropTypes from 'prop-types'
 
 import ProtectedRoutes from "./ProtectedRoutes"
 import OpenRoutes from "./OpenRoutes"
 
+
 import LoginContent from "./pages/login/LoginContent"
 import SignupContent from "./pages/signup/SignupContent"
-
-import AuthContext from './context/AuthProvider'
-import { useContext } from "react"
+import PageNotFound from "./pages/pageNotFound/PageNotFound" 
+import LandingPage from "./pages/landingPage/LandingPage"
 
 
 const Views = () => {
 
-  let {auth_state} = useContext(AuthContext)
-
   return (
     <Routes>
+          <Route path="/" element={<LandingPage/>}/>
           <Route element={<OpenRoutes/>}>
             <Route path="signup" element={<SignupContent/>}/>
             <Route path="login" element={<LoginContent/>}/>
@@ -25,7 +23,7 @@ const Views = () => {
           <Route  element={<ProtectedRoutes/>}>
             <Route path="/priv" element={<>This is bye</>}/>
           </Route>
-          <Route path="/*" element={<>Page not found</>}/>
+          <Route path="/*" element={<PageNotFound/>}/>
     </Routes>
   )
 }

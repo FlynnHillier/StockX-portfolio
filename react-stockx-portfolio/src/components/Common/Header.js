@@ -38,20 +38,9 @@ const Header = () => {
             <NavBar components ={
               [
               {
-                active:false,
-                urlPath:"/login",
-                name:"login"
-              },
-              {
-                active:false,
-                urlPath:"/signup",
-                name:"signup"
-              },
-              {
-                active:true,
                 urlPath:"/",
                 name:"dashboard"
-              }
+              },
             ]
             }></NavBar>
           </Col>

@@ -19,7 +19,7 @@ const ErrorHeader = (errorMessage)=>{
 
 
 
-const Form = ({title,fields,onSubmit,submitButtonText,ErrorMessageState}) => {
+const Form = ({title,fields,onSubmit,submitButtonText,ErrorMessageState,children}) => {
   
   // let [errorMessage,setErrorMessage] = ErrorMessageState === undefined ? [undefined,()=>{return}] : ErrorMessageState
 
@@ -79,7 +79,7 @@ const Form = ({title,fields,onSubmit,submitButtonText,ErrorMessageState}) => {
         
       </form>
 
-        {/* <ExtraElems/> */}
+        {children}
     </Container>
   )
 }

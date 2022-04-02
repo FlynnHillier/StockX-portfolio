@@ -4,6 +4,7 @@ import urlPropType from 'url-prop-type';
 import { Nav } from 'react-bootstrap'
 import './StyleSheets/navbar.css'
 
+import { useLocation } from 'react-router-dom';
 
 import { Link } from 'react-router-dom';
 
@@ -11,10 +12,10 @@ import { Link } from 'react-router-dom';
 
 
 const NavBar = ({components}) => {
+
+  const currentPath = useLocation().pathname
   return (
     <Nav
-        activeKey={components.find((component)=> component.urlPath === window.location.pathname)}
-
         className="border-top border-bottom border-1 border-secondary ps-2"
     >
 
@@ -22,7 +23,7 @@ const NavBar = ({components}) => {
         {components.map((component) => {
             return (
             <Nav.Item key={component.name}>
-                <Nav.Link as={Link} to={component.urlPath} > {component.name} </Nav.Link>
+                <Nav.Link as={Link} to={component.urlPath} active={component.urlPath === currentPath}> {component.name} </Nav.Link>
             </Nav.Item>
             )
         })}

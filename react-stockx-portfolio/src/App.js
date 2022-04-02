@@ -1,13 +1,10 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import './styles.css';
+import { Container } from 'react-bootstrap';
+
 import Header from './components/Common/Header'
 
-import { useState } from 'react';
-
 import { BrowserRouter} from "react-router-dom"
-
-import AuthContext from './context/AuthProvider';
-
 import Views from './Views';
 
 
@@ -16,12 +13,13 @@ import Views from './Views';
 
 function App() {
 
-  const [email,setEmail] = useState("")
 
   return (
       <BrowserRouter>
         <Header title="Lokker"/>
-            <Views></Views>
+        <Container fluid className="view p-4">
+            <Views></Views>            
+        </Container>
       </BrowserRouter>
   );
 }
