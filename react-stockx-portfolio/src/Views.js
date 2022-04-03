@@ -9,7 +9,7 @@ import LoginContent from "./pages/login/LoginContent"
 import SignupContent from "./pages/signup/SignupContent"
 import PageNotFound from "./pages/pageNotFound/PageNotFound" 
 import LandingPage from "./pages/landingPage/LandingPage"
-
+import CurrentStock from "./pages/currentStock/CurrentStock"
 
 const Views = () => {
 
@@ -21,6 +21,7 @@ const Views = () => {
             <Route path="login" element={<LoginContent/>}/>
           </Route>
           <Route  element={<ProtectedRoutes/>}>
+            <Route path="/stock/current" element={<CurrentStock/>}/>
             <Route path="/priv" element={<>This is bye</>}/>
           </Route>
           <Route path="/*" element={<PageNotFound/>}/>
