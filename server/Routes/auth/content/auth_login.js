@@ -28,9 +28,16 @@ function build_auth_login_router(mongoose_instance,config){
             }
 
 
-            config.mongo.mongoose_models.user.findOne({
-                email:req.body.email
-            })
+            config.mongo.mongoose_models.user.findOne(
+                {
+                    email:req.body.email
+                },
+                {
+                    email:1,
+                    password:1,
+                    authKey:1,
+                }
+            )
             .then((user_info)=>{
                 if(user_info === null){ //user not found in database
                     res.status(200).send({
@@ -58,9 +65,10 @@ function build_auth_login_router(mongoose_instance,config){
 
                     })
                     .catch((error)=>{
-                        throw{
+                        next({
+                            expected:false,
                             message:"bcrypt hash comparison failure."
-                        }
+                        })
                     })
                 }  
             })
