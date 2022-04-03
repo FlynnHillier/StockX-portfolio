@@ -5,10 +5,12 @@ function build_open_api_router(mongoose_instance,config){
 
     const open_api_routeHandler = express.Router()
 
+    const NavRoutes = require(path.join(__dirname,"content","NavRoutes"))(mongoose_instance,config)
+
+
+
     open_api_routeHandler
-    .get("/test",(req,res)=>{
-        res.status(200).send("Testing open API")
-    })
+    .use("/NavRoutes",NavRoutes)
 
 
 
