@@ -60,6 +60,22 @@ const MongoStore = require("connect-mongo")
     let stockx_api = require("./misc/stockx-api")
 
 
+
+    let NavRoutes = [
+        {
+            name:"Current Stock",
+            url:"/stock/current",
+        },
+        {
+            name:"Sold Stock",
+            url:"/stock/sold"
+        }
+    ]
+
+
+
+
+
 module.exports = {
     init_settings:init_settings,
     
@@ -68,6 +84,13 @@ module.exports = {
         sessions:sessions,
         mongo:mongo,
         req_schemas:req_schemas,
-        stockx_api:stockx_api
+        stockx_api:stockx_api,
+
+        frontend_resources:{
+            nav_routes:NavRoutes,
+
+            HostUrl:""
+        }
+
     }
 }

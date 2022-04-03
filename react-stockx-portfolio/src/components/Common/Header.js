@@ -1,4 +1,10 @@
-import React from 'react'
+import React, {useContext} from 'react'
+import AuthContext from '../../context/AuthProvider'
+
+import "./StyleSheets/header.css"
+
+import { Link } from 'react-router-dom'
+
 import PropTypes from 'prop-types'
 import {Container,Row,Col} from 'react-bootstrap'
 import Title from './Title'
@@ -7,18 +13,23 @@ import HeadNotes from './HeadNotes'
 
 
 const Header = () => {
+  
+  const {email, auth_state} = useContext(AuthContext)
+
+  
+  const headNotes = auth_state ? [<Link to='/logout'>logout</Link>,email] : [<Link to="/login">login</Link>]
+
+
+
   return (
-   <Container fluid className="bg-dark">
+   <Container fluid className="header bg-dark">
        
        <Row className='gx-0 px-3'>
           <Col xs={10}>
-            <Title title="StockX portfolio App"></Title>
+            <Title title="Lokker"></Title>
           </Col>
           <Col xs={2}>
-              <HeadNotes elements={[
-                  <a href="/login"> login </a>,
-                  <p> username</p>
-              ]}/>
+              <HeadNotes elements={headNotes}/>
           </Col>
        </Row>
        
@@ -27,20 +38,9 @@ const Header = () => {
             <NavBar components ={
               [
               {
-                active:false,
-                url:"/login",
-                name:"login"
-              },
-              {
-                active:false,
-                url:"/signup",
-                name:"signup"
-              },
-              {
-                active:true,
-                url:"/",
+                urlPath:"/",
                 name:"dashboard"
-              }
+              },
             ]
             }></NavBar>
           </Col>
