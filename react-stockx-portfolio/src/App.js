@@ -15,12 +15,17 @@ function App() {
 
 
   return (
+    <Container
+      fluid
+      className="app user-select-none" 
+    >
       <BrowserRouter>
         <Header title="Lokker"/>
         <Container fluid className="view p-4">
             <Views></Views>            
         </Container>
       </BrowserRouter>
+    </Container>
   );
 }
 

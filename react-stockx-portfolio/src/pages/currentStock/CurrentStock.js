@@ -1,10 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { Container ,Col,Row} from 'react-bootstrap'
+import { Container ,Col,Row,CardGroup} from 'react-bootstrap'
 
 
-import ItemBar from '../../components/stock/ItemBar'
+import ItemCard from '../../components/stock/ItemCard'
+
 
 
 const CurrentStock = () => {
@@ -13,17 +14,16 @@ const CurrentStock = () => {
         fluid
     >
 
-        <Row className="g-0">
-            <Col xs={5}>
-                <ItemBar 
-                    props={{
-                        title:"Dunk low helix stinks of shit",
-                        imgUrl:"https://images.stockx.com/images/Nike-Dunk-Low-Fossil-Rose.jpg?fit=fill&bg=FFFFFF&w=480&h=320&fm=avif&auto=compress&q=90&dpr=1&trim=color&updated_at=1646932682",
-                        qty:100
-                    }}
-                />
+        <Row>
+            <Col xs={6} sm={4} md={4} lg={3} xl={2}>
+                <ItemCard data={{
+                    imgURL:"https://images.stockx.com/images/Nike-Dunk-Low-Fossil-Rose.jpg",
+                    qty:5,
+                    sizes:[1,2,3]
+                }}/>
             </Col>
         </Row>
+    
 
     </Container>
   )
