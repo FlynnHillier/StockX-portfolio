@@ -8,9 +8,14 @@ const cors = require("cors")
 function route_handling(app,mongoose_instance,config){
 
     app.use(bodyparser.urlencoded({ extended: true }))
-    app.use(bodyparser.json())
+    app.use(bodyparser.json())    
+    app.use(cors(
+        {
+            origin: config.client.host,
+            credentials: true,
+        }
+    ))
     app.use(sessions(config.sessions))
-    app.use(cors())
 
 
     const api = require(path.join(config.directories.routes,"api","api_RouteHandling.js"))(mongoose_instance,config)

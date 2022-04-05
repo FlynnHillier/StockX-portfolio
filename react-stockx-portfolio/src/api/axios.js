@@ -2,7 +2,9 @@ import axios from 'axios'
 
 const axios_default = axios.create(
     {
-        baseURL:"http://78.143.196.64:5000"
+        baseURL:"http://localhost:5000",
+        withCredentials: true,
+        headers: {'Access-Control-Allow-Origin': '*'}
     }
 )
 
