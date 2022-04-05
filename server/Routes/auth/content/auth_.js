@@ -11,15 +11,39 @@ function build_auth_root_router(mongoose_instance,config){
 
     auth_root_router
     .route("/")
-    .post((req,res)=>{
-        if(req.session.authKey !== undefined){
-            res.send({
-                result:true,
-            })
-        } else{
-            res.send({
-                result:false
-            })
+    .get(async (req,res,next)=>{
+        
+        try{
+            if(req.session.authKey !== undefined){
+                
+                const UserInfo = await config.mongo.mongoose_models.user.findOne(
+                    {
+                        authKey:req.session.authKey
+                    },
+                    {
+                        email:1
+                    }
+                )
+                
+                const email = UserInfo.email
+
+                res.send({
+                    result:true,
+                    email:email
+                })
+            } else{
+                res.send({
+                    result:false
+                })
+            }
+        } catch(err){
+            next(
+                {
+                    expected:false,
+                    message:"error responding to /auth request",
+                    error:err
+                }
+            )
         }
     })
 
