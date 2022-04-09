@@ -1,9 +1,9 @@
 import React,{useContext} from 'react'
-import AuthContext from './context/AuthProvider'
+import AuthContext from './../context/AuthProvider'
 
 import { Outlet } from 'react-router-dom'
 
-import LoginContent from './pages/login/LoginContent'
+import LoginContent from '../pages/login/LoginContent'
 
 
 const useAuth = () => {

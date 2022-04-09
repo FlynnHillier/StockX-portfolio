@@ -1,5 +1,5 @@
 import react,{ useContext } from 'react'
-import AuthContext from './context/AuthProvider'
+import AuthContext from './../context/AuthProvider'
 
 import { Navigate,Outlet } from 'react-router-dom'
 

@@ -146,9 +146,7 @@ function get_product_specific_sizing(sizes=[],urlKey){
                 productFound:true,
                 imageURL:data.media.imageUrl,
                 listingType:data.listingType,
-                sizes:{
-
-                }
+                sizesInfo:[]
             }
 
             for(let size of sizes){
@@ -156,12 +154,14 @@ function get_product_specific_sizing(sizes=[],urlKey){
                 let size_info = data.variants.find((variant) => variant.traits.size == size)
                 
                 if(size_info === undefined){
-                    response.sizes[size] = {
+                    response.sizesInfo.push({
+                        size:size,
                         exists:false
-                    }
+                    })
                 }
                 else{
-                    response.sizes[size] = {
+                    response.sizesInfo.push({
+                        size:size,
                         exists:true,
                         id:size_info.id,
                         lowestAsk:size_info.market.bidAskData.lowestAsk,
@@ -170,7 +170,7 @@ function get_product_specific_sizing(sizes=[],urlKey){
                         lastSale_changePercentage:size_info.market.salesInformation.changePercentage,
                         lastSale_changeValue:size_info.market.salesInformation.changeValue,
                         salesVolatility:size_info.market.salesInformation.volatility
-                    }
+                    })
                 }
             }
 

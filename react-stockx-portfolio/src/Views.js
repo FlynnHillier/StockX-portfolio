@@ -1,15 +1,15 @@
 import { Route, Routes,Outlet} from "react-router-dom"
 import React from 'react'
 
-import ProtectedRoutes from "./ProtectedRoutes"
-import OpenRoutes from "./OpenRoutes"
+import ProtectedRoutes from "./routers/ProtectedRoutes"
+import OpenRoutes from "./routers/OpenRoutes"
 
 
 import LoginContent from "./pages/login/LoginContent"
 import SignupContent from "./pages/signup/SignupContent"
 import PageNotFound from "./pages/pageNotFound/PageNotFound" 
 import LandingPage from "./pages/landingPage/LandingPage"
-import CurrentStock from "./pages/currentStock/CurrentStock"
+import CurrentStockPage from "./pages/currentStock/CurrentStockPage"
 import Logout from "./pages/logout/logout"
 
 
@@ -23,15 +23,8 @@ const Views = () => {
             <Route path="login" element={<LoginContent/>}/>
           </Route>
           <Route  element={<ProtectedRoutes/>}>
-            <Route 
-              path="/stock" 
-              element={
-                <>
-                  <Outlet/>
-                </>
-              }
-            >
-              <Route path="current" element={<CurrentStock/>}/>
+            <Route path="/stock">
+              <Route path="current" element={<CurrentStockPage/>}></Route>
             </Route>
             <Route path="/priv" element={<>This is bye</>}/>
             <Route path="/logout" element={<Logout/>}/>
