@@ -11,7 +11,7 @@ export const StockProvider = ({children}) => {
 
     let [currentStock,setCurrentStock] = useState([])
     let [currentStockIsLoaded,setCurrentStockIsLoaded] = useState(false)
-
+    let [currentStockPricesLoaded,setCurrentStockPricesLoaded] = useState(false)
 
 
 
@@ -44,7 +44,6 @@ export const StockProvider = ({children}) => {
 
             }
 
-
             setCurrentStock(currentStockIsLoaded ? currentStock : retrievedCurrentStock)
             setCurrentStockIsLoaded(true)
 
@@ -57,7 +56,7 @@ export const StockProvider = ({children}) => {
 
     const currentStock_loadPricingData = (urlKeysToLoad=[]) => { //itemsToLoad array of url-keys to load pricings
         return new Promise((resolve,reject)=>{
-            
+
             if(Array.isArray(urlKeysToLoad) === false){
 
                 return reject({
@@ -150,6 +149,7 @@ export const StockProvider = ({children}) => {
                             return stock
                         })
 
+
                     })
                     .catch((err)=>{
                         errors.push(
@@ -169,6 +169,7 @@ export const StockProvider = ({children}) => {
             Promise.all(pendingPromises)
             .then((_)=>{
                 resolve()
+                setCurrentStockPricesLoaded(true)
             })
             .catch((_)=>{
                 reject(
@@ -261,6 +262,7 @@ export const StockProvider = ({children}) => {
             currentStockIsLoaded,
             currentStock_load,
             currentStock_loadPricingData,
+            currentStockPricesLoaded,
         }}>
 
         {children}

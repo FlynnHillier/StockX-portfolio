@@ -12,30 +12,24 @@ import StockContext from '../../context/StockProvider'
 
 const CurrentStockPage = () => {
 
-    let {currentStock,currentStock_load,currentStockIsLoaded,currentStock_loadPricingData} = useContext(StockContext)
+    let {currentStock,currentStock_load,currentStockIsLoaded,currentStock_loadPricingData,currentStockPricesLoaded} = useContext(StockContext)
 
 
 
     useEffect(()=>{
-
-        async function loadItemData(){
-
-            await currentStock_load()
-
-            // await currentStock_loadPricingData()
+        if(currentStockIsLoaded === false){
+            currentStock_load()
         }
-
-        loadItemData()
-
     },[])
 
 
 
     useEffect(()=>{
 
-        currentStock_loadPricingData()
-
-    },[currentStock])
+        if(currentStockPricesLoaded === false && currentStockIsLoaded === true){
+            currentStock_loadPricingData()
+        }
+    },[currentStockIsLoaded])
 
 
     
@@ -47,16 +41,16 @@ const CurrentStockPage = () => {
         <Row>
 
             {
-                currentStockIsLoaded ?
-                
-                currentStock.map((item)=>{
+                currentStockIsLoaded  && currentStockPricesLoaded?
+
+
+                currentStock.map((item)=>{ 
                     
                     let totalAskValue = 0
                     let totalBidValue = 0
                     let totalSaleValue = 0
 
                     for(let sizeObj of item.sizes){
-
                         totalAskValue += (sizeObj.lowestAsk * sizeObj.qty)
                         totalBidValue += (sizeObj.highestBid * sizeObj.qty)
                         totalSaleValue += (sizeObj.lastSale * sizeObj.qty)
