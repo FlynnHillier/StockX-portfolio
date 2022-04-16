@@ -26,7 +26,7 @@ const ItemCard = ({
     let navigate = useNavigate()
 
     const onViewMore = () => {
-        let path = `view?item=${urlKey}`
+        let path = `view/${urlKey}`
         navigate(path)
     }
 

@@ -10,7 +10,10 @@ import SignupContent from "./pages/signup/SignupContent"
 import PageNotFound from "./pages/pageNotFound/PageNotFound" 
 import LandingPage from "./pages/landingPage/LandingPage"
 import CurrentStockPage from "./pages/currentStock/CurrentStockPage"
+import CurrentStockViewItemPage from "./pages/itemView/CurrentStockViewItemPage"
 import Logout from "./pages/logout/logout"
+import ammendItemPage from "./pages/ammendItemPage/AmmendItemPage"
+import AmmendItemPage from "./pages/ammendItemPage/AmmendItemPage"
 
 
 const Views = () => {
@@ -24,7 +27,11 @@ const Views = () => {
           </Route>
           <Route  element={<ProtectedRoutes/>}>
             <Route path="/stock">
-              <Route path="current" element={<CurrentStockPage/>}></Route>
+              <Route path="current">
+                <Route path=""  element={<CurrentStockPage/>}/>
+                <Route path="view/:itemID" element={<CurrentStockViewItemPage/>}/>
+                <Route path="view/:itemID/ammend" element={<AmmendItemPage/>}/>
+              </Route>
             </Route>
             <Route path="/priv" element={<>This is bye</>}/>
             <Route path="/logout" element={<Logout/>}/>
