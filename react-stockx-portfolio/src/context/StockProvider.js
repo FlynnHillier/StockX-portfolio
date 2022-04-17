@@ -12,6 +12,7 @@ export const StockProvider = ({children}) => {
     let [currentStock,setCurrentStock] = useState([])
     let [currentStockIsLoaded,setCurrentStockIsLoaded] = useState(false)
     let [currentStockPricesLoaded,setCurrentStockPricesLoaded] = useState(false)
+    let [currentStockIsInitialised,setCurrentStockIsInitialised] = useState(false)
 
 
 
@@ -47,7 +48,7 @@ export const StockProvider = ({children}) => {
             setCurrentStock(currentStockIsLoaded ? currentStock : retrievedCurrentStock)
             setCurrentStockIsLoaded(true)
 
-            resolve()
+            resolve(retrievedCurrentStock)
         })
     }
 
@@ -91,8 +92,6 @@ export const StockProvider = ({children}) => {
 
             let pendingPromises = []
             let errors = []
-
-
 
             for(let itemForLoad of itemsToLoad){
 
@@ -255,14 +254,157 @@ export const StockProvider = ({children}) => {
 
 
 
+    const currentStock_init = () => {
+        return new Promise(async (resolve,reject)=>{
+
+            if(currentStockPricesLoaded === true && currentStockIsLoaded === true){
+                resolve()
+            } else{
+                try {
+                
+                    const loadedStock = await new Promise(async(resolve,reject)=>{
+                        let serverResponse
+            
+                        if(currentStockIsLoaded === false){
+                            serverResponse = await axios.get(
+                                "api/private/stock/current"
+                            )
+            
+                            if(serverResponse.status !== 200){
+                                reject({
+                                    message:"server responded with a response that was not 200",
+                                    serverResponse:serverResponse.status
+                                })
+                            }
+                        }
+                        
+                        
+                        let retrievedCurrentStock = serverResponse.data
+            
+                        for(let item of retrievedCurrentStock){ //set total qty of item
+                            item.qty = 0
+            
+                            for(let sizeObj of item.sizes){
+                                item.qty += sizeObj.qty
+                            }
+            
+                        }
+            
+                        setCurrentStock(currentStockIsLoaded ? currentStock : retrievedCurrentStock)
+                        setCurrentStockIsLoaded(true)
+            
+                        resolve(retrievedCurrentStock)
+                    })
+
+
+    
+
+
+                    let pendingPromises = []
+                    let errors = []
+
+                    for(let itemForLoad of loadedStock){
+
+
+                        pendingPromises.push(
+                            new Promise(async (resolve,reject)=>{
+
+                                let sizes = []
+                                for(let sizeObj of itemForLoad.sizes){
+                                    sizes.push(sizeObj.size)
+                                }
+
+                                axios.post(
+                                    "api/private/stockx/pricing",
+                                    {
+                                        urlKey:itemForLoad.urlKey,
+                                        sizes:sizes
+                                    }
+                                )
+                                .then((serverResponse)=>{
+                                    resolve(serverResponse.data.data)
+                                })
+                                .catch((error)=>{
+                                    console.log("error caught!")
+                                    reject(error)
+                                })
+                            })
+                            .then((resolutionData)=>{
+
+
+                                    const targetItemInStock = loadedStock.find((itemInStock)=>itemInStock.urlKey === itemForLoad.urlKey)
+
+                                    if(resolutionData.productFound === false){
+                                        targetItemInStock.exists = false
+                                    }
+
+                                    if(resolutionData.productFound === true){
+                                        targetItemInStock.exists = true
+
+
+                                        for(let info of resolutionData.sizesInfo){
+                                            const targetSizeObj = targetItemInStock.sizes.find((sizeObj)=>sizeObj.size === info.size)
+                                            targetSizeObj.lowestAsk = info.lowestAsk
+                                            targetSizeObj.highestBid = info.highestBid
+                                            targetSizeObj.lastSale = info.lastSale
+                                        }
+
+                                    }
+
+                            })
+                            .catch((err)=>{
+                                const error = {
+                                    message:"error loading item pricing info",
+                                    item:itemForLoad,
+                                    error:err
+                                }
+                                errors.push(
+                                    error
+                                )
+
+                                reject(error)
+                            })
+                        )
+                    }
+
+
+                    Promise.all(pendingPromises)
+                    .then((_)=>{
+                        setCurrentStock(loadedStock)
+                        setCurrentStockPricesLoaded(true)
+
+                        setCurrentStockIsInitialised(true)
+                        resolve()
+
+                    })
+                    .catch((_)=>{
+                        reject(
+                            {
+                                message:"error loading one or more items pricing Info",
+                                errors:errors
+                            }
+                        )
+                    })
+
+                } catch(err){
+                    throw Error({
+                        message:"error loading user's currentStock",
+                        err:err
+                    })
+                }
+            }
+        })
+    }
+
+
+
 
     return (
         <StockContext.Provider value={{
             currentStock,
-            currentStockIsLoaded,
-            currentStock_load,
-            currentStock_loadPricingData,
-            currentStockPricesLoaded,
+            currentStockIsInitialised,
+            currentStock_init,
+            currentStock_addItems,
         }}>
 
         {children}

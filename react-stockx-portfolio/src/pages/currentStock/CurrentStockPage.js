@@ -12,26 +12,13 @@ import StockContext from '../../context/StockProvider'
 
 const CurrentStockPage = () => {
 
-    let {currentStock,currentStock_load,currentStockIsLoaded,currentStock_loadPricingData,currentStockPricesLoaded} = useContext(StockContext)
+    let {currentStock,currentStock_init,currentStockIsInitialised} = useContext(StockContext)
 
 
 
     useEffect(()=>{
-        if(currentStockIsLoaded === false){
-            currentStock_load()
-        }
+        currentStock_init()
     },[])
-
-
-
-    useEffect(()=>{
-
-        if(currentStockPricesLoaded === false && currentStockIsLoaded === true){
-            currentStock_loadPricingData()
-        }
-    },[currentStockIsLoaded])
-
-
     
   return (
     <Container 
@@ -41,7 +28,7 @@ const CurrentStockPage = () => {
         <Row>
 
             {
-                currentStockIsLoaded  && currentStockPricesLoaded?
+                currentStockIsInitialised ?
 
 
                 currentStock.map((item)=>{ 

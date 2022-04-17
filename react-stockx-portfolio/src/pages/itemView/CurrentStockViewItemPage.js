@@ -38,7 +38,6 @@ const SizingSelector = ({sizingData,selectedSize,setSelectedSize}) => {
                     return (
                       <Col xxl={3} xl={3} lg={3} md={4} xs={4}  key={size.size}>
                         <div
-                          action
                           key={size.size}
                           className={classes}
                           onClick={()=>{
@@ -239,16 +238,14 @@ const ItemSummary = ({currentItemData}) => {
 
 
 
-const CurrentStockViewItemPage = () => {
-  let {currentStock} = useContext(StockContext)
-  const {itemID} = useParams()
+const CurrentStockViewItem = ({currentStock,itemID}) => {
   let [currentItemData,setCurrentItemData] = useState({})
   let [isLoading,setIsLoading] = useState(true)
   let [sizingData,setSizingData] = useState([])
   let [selectedSize,setSelectedSize] = useState(null)
   let [displaySizeElemenent,setDisplaySizeElement] = useState(<>Element not loaded yet.</>)
 
-
+  
 
 
   function onLoad(){
@@ -342,6 +339,30 @@ const CurrentStockViewItemPage = () => {
       </ItemPageStandard>
   )
 }
+
+
+const CurrentStockViewItemPage = ({}) => {
+  let {currentStock,currentStockIsInitialised,currentStock_init} = useContext(StockContext)
+  const {itemID} = useParams()
+
+  useEffect(()=>{
+    currentStock_init()
+  },[])
+
+  return currentStockIsInitialised ? 
+  <CurrentStockViewItem
+    currentStock={currentStock}
+    itemID={itemID}  
+  />
+  :
+  <>
+    Loading current Stock context....
+  </>
+
+}
+
+
+
 
 CurrentStockViewItemPage.propTypes = {}
 
