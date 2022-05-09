@@ -12,14 +12,7 @@ import StockContext from '../../context/StockProvider'
 
 const CurrentStockPage = () => {
 
-    let {currentStock,currentStock_init,currentStockIsInitialised} = useContext(StockContext)
-
-
-
-    useEffect(()=>{
-        currentStock_init()
-    },[])
-    
+    let {currentStock} = useContext(StockContext)
   return (
     <Container 
         fluid
@@ -28,9 +21,6 @@ const CurrentStockPage = () => {
         <Row>
 
             {
-                currentStockIsInitialised ?
-
-
                 currentStock.map((item)=>{ 
                     
                     let totalAskValue = 0
@@ -61,8 +51,6 @@ const CurrentStockPage = () => {
                     )
 
                 }) 
-                
-                : <>loading..</>
 
             }
         </Row>

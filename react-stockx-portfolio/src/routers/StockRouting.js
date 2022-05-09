@@ -1,18 +1,22 @@
 import react,{ useContext } from 'react'
-import AuthContext from './../context/AuthProvider'
+import StockContext from './../context/StockProvider'
 
 import { Navigate,Outlet } from 'react-router-dom'
 
+import LoadCurrentStockPage from '../pages/loadCurrentStockPage/LoadCurrentStockPage'
 
-const useAuth = () => {
-    const {auth_state} = useContext(AuthContext)
-    return !auth_state
+
+
+
+const IsStockLoaded = () => {
+    let {currentStockIsInitialised} = useContext(StockContext)
+    return currentStockIsInitialised
 }
 
 
-const OpenRoutes = () => {
-    return useAuth() ? <Outlet/> : <Navigate to="/"/>
+const StockRouter = () => {
+    return IsStockLoaded() ? <Outlet/> : <LoadCurrentStockPage/>
 }
 
 
-export default OpenRoutes
+export default StockRouter

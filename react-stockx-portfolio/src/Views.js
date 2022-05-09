@@ -3,6 +3,7 @@ import React from 'react'
 
 import ProtectedRoutes from "./routers/ProtectedRoutes"
 import OpenRoutes from "./routers/OpenRoutes"
+import StockRouter from "./routers/StockRouting"
 
 
 import LoginContent from "./pages/login/LoginContent"
@@ -27,7 +28,7 @@ const Views = () => {
           </Route>
           <Route  element={<ProtectedRoutes/>}>
             <Route path="/stock">
-              <Route path="current">
+              <Route path="current" element={<StockRouter/>}>
                 <Route path=""  element={<CurrentStockPage/>}/>
                 <Route path="view/:itemID" element={<CurrentStockViewItemPage/>}/>
                 <Route path="view/:itemID/ammend" element={<AmmendItemPage/>}/>

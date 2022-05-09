@@ -342,22 +342,15 @@ const CurrentStockViewItem = ({currentStock,itemID}) => {
 
 
 const CurrentStockViewItemPage = ({}) => {
-  let {currentStock,currentStockIsInitialised,currentStock_init} = useContext(StockContext)
+  let {currentStock} = useContext(StockContext)
   const {itemID} = useParams()
 
-  useEffect(()=>{
-    currentStock_init()
-  },[])
-
-  return currentStockIsInitialised ? 
-  <CurrentStockViewItem
-    currentStock={currentStock}
-    itemID={itemID}  
-  />
-  :
-  <>
-    Loading current Stock context....
-  </>
+  return (
+    <CurrentStockViewItem
+      currentStock={currentStock}
+      itemID={itemID}  
+    />
+  )
 
 }
 
