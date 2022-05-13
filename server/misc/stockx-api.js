@@ -3,7 +3,8 @@ const axios = require("axios")
 
 
 axios.defaults.headers.common = {
-        "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
+        "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
+        "referer":"https://stockx.com/"
     }
 
 axios.defaults.baseURL = "https://stockx.com/"
