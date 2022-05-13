@@ -2,6 +2,8 @@ import React,{useContext, useEffect} from 'react'
 
 import StockContext from '../../context/StockProvider'
 
+import { Spinner,Container,Row,Col } from 'react-bootstrap'
+
 
 const LoadCurrentStockPage = () => {
 
@@ -12,9 +14,38 @@ const LoadCurrentStockPage = () => {
     },[])
 
   return (
-   <>
-    sit tight! we're just remembering all the items you own.
-   </>
+   <Container fluid>
+     <Row>
+       <Col xs={12}>
+        <Row>
+            <Col>
+            </Col>
+            <Col
+              className="text-center"
+            >
+              <Spinner 
+                animation="border"
+              />
+            </Col>
+            <Col>
+            </Col>
+        </Row>
+      </Col>
+      <Col xs={12}>
+        <Row>
+            <Col>
+            </Col>
+            <Col
+              className="text-center"
+            >
+              Loading your items....
+            </Col>
+            <Col>
+            </Col>
+        </Row>
+      </Col>
+     </Row>
+   </Container>
   )
 }
 

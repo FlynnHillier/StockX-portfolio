@@ -13,8 +13,9 @@ import LandingPage from "./pages/landingPage/LandingPage"
 import CurrentStockPage from "./pages/currentStock/CurrentStockPage"
 import CurrentStockViewItemPage from "./pages/itemView/CurrentStockViewItemPage"
 import Logout from "./pages/logout/logout"
-import ammendItemPage from "./pages/ammendItemPage/AmmendItemPage"
 import AmmendItemPage from "./pages/ammendItemPage/AmmendItemPage"
+import AmmendCurrentStockPage from "./pages/AmmendCurrentStockPage/AmmendCurrentStockPage"
+
 
 
 const Views = () => {
@@ -30,6 +31,7 @@ const Views = () => {
             <Route path="/stock">
               <Route path="current" element={<StockRouter/>}>
                 <Route path=""  element={<CurrentStockPage/>}/>
+                <Route path="ammend" element={<AmmendCurrentStockPage/>}/>
                 <Route path="view/:itemID" element={<CurrentStockViewItemPage/>}/>
                 <Route path="view/:itemID/ammend" element={<AmmendItemPage/>}/>
               </Route>

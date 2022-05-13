@@ -1,0 +1,7 @@
+.AmmendCurrenStock.form-control:focus {
+    box-shadow: none;
+}
+
+.searchResult.searchResult_item:hover {
+    cursor: pointer;
+}

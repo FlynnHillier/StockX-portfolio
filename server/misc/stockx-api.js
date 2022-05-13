@@ -56,12 +56,15 @@ function search_item(search_term,max_results=4){
             for(let i = 0; i < upperBound;i++){
                 let product = products[i]
 
+
+
                 response.push({
                     title:product.title,
                     type:product.shoe,
                     colorway:product.traits.find((trait)=> trait.name === "Colorway" || trait.name === "Color").value,
                     urlKey:product.urlKey,
-                    releaseDate:product.traits.find((trait)=>trait.name === "Release Date").value
+                    releaseDate:product.traits.find((trait)=>trait.name === "Release Date").value,
+                    media:product.media
                 })
             }
             
