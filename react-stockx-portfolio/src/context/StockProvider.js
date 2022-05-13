@@ -256,26 +256,20 @@ export const StockProvider = ({children}) => {
 
     const currentStock_init = () => {
         return new Promise(async (resolve,reject)=>{
-
-            if(currentStockPricesLoaded === true && currentStockIsLoaded === true){
-                resolve()
-            } else{
                 try {
                 
                     const loadedStock = await new Promise(async(resolve,reject)=>{
                         let serverResponse
             
-                        if(currentStockIsLoaded === false){
-                            serverResponse = await axios.get(
-                                "api/private/stock/current"
-                            )
-            
-                            if(serverResponse.status !== 200){
-                                reject({
-                                    message:"server responded with a response that was not 200",
-                                    serverResponse:serverResponse.status
-                                })
-                            }
+                        serverResponse = await axios.get(
+                            "api/private/stock/current"
+                        )
+        
+                        if(serverResponse.status !== 200){
+                            reject({
+                                message:"server responded with a response that was not 200",
+                                serverResponse:serverResponse.status
+                            })
                         }
                         
                         
@@ -358,6 +352,8 @@ export const StockProvider = ({children}) => {
                                     item:itemForLoad,
                                     error:err
                                 }
+
+                                console.log("in here")
                                 errors.push(
                                     error
                                 )
@@ -378,6 +374,9 @@ export const StockProvider = ({children}) => {
 
                     })
                     .catch((_)=>{
+
+                        console.log(_)
+
                         reject(
                             {
                                 message:"error loading one or more items pricing Info",
@@ -393,7 +392,7 @@ export const StockProvider = ({children}) => {
                     })
                 }
             }
-        })
+        )
     }
 
 
@@ -405,6 +404,7 @@ export const StockProvider = ({children}) => {
             currentStockIsInitialised,
             currentStock_init,
             currentStock_addItems,
+            setCurrentStockIsInitialised
         }}>
 
         {children}
