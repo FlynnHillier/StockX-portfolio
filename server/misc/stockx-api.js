@@ -86,13 +86,13 @@ function search_item(search_term,max_results=4){
 
 function get_product_info(product_urlKey){
     return new Promise((resolves,rejects)=>{
-        
         axios({
             url:"/p/e",
             method:"post",
             data:{
                     operationName: "GetProduct",
-                    query:"query GetProduct($id: String!, $currencyCode: CurrencyCode, $countryCode: String!, $marketName: String) {  product(id: $id) { id listingType urlKey media { imageUrl } ...LastSale_Bid_Ask } } fragment LastSale_Bid_Ask on Product { variants { id traits { size } market(currencyCode: $currencyCode) { bidAskData(country: $countryCode, market: $marketName) { highestBid lowestAsk } salesInformation { volatility lastSale changeValue changePercentage } } } }",
+                    query:"query GetProduct($id: String!, $currencyCode: CurrencyCode, $countryCode: String!, $marketName: String) { product(id: $id) { id listingType urlKey media { imageUrl } ...LastSale_Bid_Ask ...ProductSchemaFragment } } fragment LastSale_Bid_Ask on Product { variants { id traits { size } market(currencyCode: $currencyCode) { bidAskData(country: $countryCode, market: $marketName) { highestBid lowestAsk } salesInformation { volatility lastSale changeValue changePercentage } } } }  fragment ProductSchemaFragment on Product { id urlKey productCategory brand model title description condition styleId media { thumbUrl imageUrl __typename } market(currencyCode: $currencyCode) { bidAskData(country: $countryCode, market: $marketName) { lowestAsk numberOfAsks __typename } __typename } variants { id hidden traits { size __typename } market(currencyCode: $currencyCode) { bidAskData(country: $countryCode, market: $marketName) { lowestAsk __typename } __typename } __typename } __typename}",
+                    //query:"query GetProduct($id: String!, $currencyCode: CurrencyCode, $countryCode: String!, $marketName: String) {  product(id: $id) { id listingType urlKey media { imageUrl } ...LastSale_Bid_Ask } } fragment LastSale_Bid_Ask on Product { variants { id traits { size } market(currencyCode: $currencyCode) { bidAskData(country: $countryCode, market: $marketName) { highestBid lowestAsk } salesInformation { volatility lastSale changeValue changePercentage } } } }",
                     variables:{
                         countryCode: countryCode,
                         currencyCode: currencyCode,
@@ -150,6 +150,10 @@ function get_product_specific_sizing(sizes=[],urlKey){
                 productFound:true,
                 imageURL:data.media.imageUrl,
                 listingType:data.listingType,
+                productCategory: data.productCategory,
+                brand: data.brand,
+                model: data.model,
+                title: data.title,
                 sizesInfo:[]
             }
 
@@ -177,7 +181,6 @@ function get_product_specific_sizing(sizes=[],urlKey){
                     })
                 }
             }
-
             resolves(response)
         })
         .catch((error)=>{
@@ -187,6 +190,42 @@ function get_product_specific_sizing(sizes=[],urlKey){
 }
 
 
+function get_product_metaInfo(product_urlKey){
+    return new Promise((resolves,rejects)=>{
+        axios({
+            url:"/p/e",
+            method:"post",
+            data:{
+                    operationName: "GetProduct",
+                    query:"query GetProduct($id: String!, $currencyCode: CurrencyCode, $countryCode: String!, $marketName: String) { product(id: $id) { id listingType urlKey media { imageUrl } ...ProductSchemaFragment } }  fragment ProductSchemaFragment on Product { id urlKey productCategory brand model title condition styleId media { thumbUrl imageUrl __typename } market(currencyCode: $currencyCode) { bidAskData(country: $countryCode, market: $marketName) { numberOfBids numberOfAsks } __typename } variants { hidden traits { size } } }",
+                    variables:{
+                        countryCode: countryCode,
+                        currencyCode: currencyCode,
+                        id: product_urlKey
+                    }
+            },
+            headers:{
+                    "apollographql-client-name": "Iron",
+                    "apollographql-client-version": "2022.02.27.01",
+            }
+        })
+        .then((result)=>{
+            if(result.status !== 200){
+                rejects({
+                    reason:"status code incorrect"
+                })
+            }
+
+            resolves(result.data.data.product)
+        })
+        .catch((error)=>{
+            rejects({
+                error:error,
+                reason:"axios failure"
+            })
+        })
+    })
+}
 
 
 
@@ -223,10 +262,9 @@ function get_product_specific_sizing(sizes=[],urlKey){
 
 
 
-
-
 module.exports = {
     search:search_item,
     get_product_info:get_product_info,
-    get_product_specific_sizing:get_product_specific_sizing
+    get_product_specific_sizing:get_product_specific_sizing,
+    get_product_metaInfo:get_product_metaInfo,
 }
