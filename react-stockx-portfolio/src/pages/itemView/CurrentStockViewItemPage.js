@@ -127,7 +127,7 @@ const SingleSizeInfoDisplay = ({sizeData}) => {
 
 
 
-const AmmendItemButton = ({}) => {
+const AmmendItemButton = ({currentItemData}) => {
 
   let navigate = useNavigate()
 
@@ -136,7 +136,15 @@ const AmmendItemButton = ({}) => {
     <Button
       variant="secondary"
       onClick={()=>{  
-        navigate(`./ammend`)
+        navigate(
+          `./ammend`
+          ,
+          {
+            state:{
+              currentItemData:currentItemData
+            }
+          }
+          )
       }}
     >
       Ammend item stock
@@ -210,7 +218,9 @@ const ItemSummary = ({currentItemData}) => {
             </ListGroup>
           </Card.Body>
         </Card>
-        <AmmendItemButton/>
+        <AmmendItemButton
+          currentItemData={currentItemData}
+        />
       </Card.Body>
 
       </Card>

@@ -16,6 +16,7 @@ import Logout from "./pages/logout/logout"
 import AmmendItemPage from "./pages/ammendItemPage/AmmendItemPage"
 import AmmendCurrentStockPage from "./pages/AmmendCurrentStockPage/AmmendCurrentStockPage"
 
+import AmmendItem from "./pages/AmmendItemPageV2/AmmendItem"
 
 
 const Views = () => {
@@ -33,7 +34,7 @@ const Views = () => {
                 <Route path=""  element={<CurrentStockPage/>}/>
                 <Route path="ammend" element={<AmmendCurrentStockPage/>}/>
                 <Route path="view/:itemID" element={<CurrentStockViewItemPage/>}/>
-                <Route path="view/:itemID/ammend" element={<AmmendItemPage/>}/>
+                <Route path="view/:itemID/ammend" element={<AmmendItem/>}/>
               </Route>
             </Route>
             <Route path="/priv" element={<>This is bye</>}/>
