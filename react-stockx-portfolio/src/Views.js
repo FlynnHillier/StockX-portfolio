@@ -17,6 +17,7 @@ import AmmendItemPage from "./pages/ammendItemPage/AmmendItemPage"
 import AmmendCurrentStockPage from "./pages/AmmendCurrentStockPage/AmmendCurrentStockPage"
 
 import AmmendItem from "./pages/AmmendItemPageV2/AmmendItem"
+import SettingsPage from "./pages/Settings/SettingsPage"
 
 
 const Views = () => {
@@ -29,16 +30,17 @@ const Views = () => {
             <Route path="login" element={<LoginContent/>}/>
           </Route>
           <Route  element={<ProtectedRoutes/>}>
-            <Route path="/stock">
-              <Route path="current" element={<StockRouter/>}>
-                <Route path=""  element={<CurrentStockPage/>}/>
-                <Route path="ammend" element={<AmmendCurrentStockPage/>}/>
-                <Route path="view/:itemID" element={<CurrentStockViewItemPage/>}/>
-                <Route path="view/:itemID/ammend" element={<AmmendItem/>}/>
+              <Route path="/settings" element={<SettingsPage/>}/>
+              <Route path="/stock">
+                <Route path="current" element={<StockRouter/>}>
+                  <Route path=""  element={<CurrentStockPage/>}/>
+                  <Route path="ammend" element={<AmmendCurrentStockPage/>}/>
+                  <Route path="view/:itemID" element={<CurrentStockViewItemPage/>}/>
+                  <Route path="view/:itemID/ammend" element={<AmmendItem/>}/>
+                </Route>
               </Route>
-            </Route>
-            <Route path="/priv" element={<>This is bye</>}/>
-            <Route path="/logout" element={<Logout/>}/>
+              <Route path="/priv" element={<>This is bye</>}/>
+              <Route path="/logout" element={<Logout/>}/>
           </Route>
           <Route path="/*" element={<PageNotFound/>}/>
     </Routes>

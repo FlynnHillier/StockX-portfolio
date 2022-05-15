@@ -92,6 +92,18 @@ const stock_schema = new schema({
 })
 
 
+const settings_schema = new schema({
+    _id:false,
+    fee:{
+        type:Number,
+        max:1,
+        min:0,
+        default:0,
+        required:true,
+    }
+})
+
+
 
 mongoose_models = {
 
@@ -110,6 +122,7 @@ mongoose_models = {
             required:true,
             unique:true,
         },
+        settings:settings_schema,
         stock:stock_schema
     })),
 

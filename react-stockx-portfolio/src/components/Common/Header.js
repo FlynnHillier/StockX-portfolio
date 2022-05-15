@@ -45,6 +45,10 @@ const Header = () => {
                 urlPath:"/stock/current",
                 name:"current stock"
               },
+              {
+                urlPath:"/settings",
+                name:"settings"
+              }
             ]
             }></NavBar>
           </Col>

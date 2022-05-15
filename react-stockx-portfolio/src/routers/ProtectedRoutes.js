@@ -5,6 +5,7 @@ import { Outlet } from 'react-router-dom'
 
 import LoginContent from '../pages/login/LoginContent'
 
+import { SettingsProvider } from '../context/SettingsProvider'
 
 const useAuth = () => {
     const {auth_state} = useContext(AuthContext)
@@ -13,7 +14,7 @@ const useAuth = () => {
 
 
 const ProtectedRoutes = () => {
-    return useAuth() ? <Outlet/> : <LoginContent/>
+    return useAuth() ? <SettingsProvider><Outlet/></SettingsProvider> : <LoginContent/>
 }
 
 

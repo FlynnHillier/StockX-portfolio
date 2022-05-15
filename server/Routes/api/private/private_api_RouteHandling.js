@@ -7,6 +7,8 @@ function build_private_api_router(mongoose_instance,config){
     const getEmail = require(path.join(__dirname,"content","api_private_getEmail"))(mongoose_instance,config)
     const stockx = require(path.join(__dirname,"stockx","api_private_stockx_RouteHandling"))(mongoose_instance,config)
     const stock = require(path.join(__dirname,"stock","api_private_stock_RouteHandling"))(mongoose_instance,config)
+    const settings = require(path.join(__dirname,"content","api_private_settings"))(mongoose_instance,config)
+
 
     const private_api_routeHandler = express.Router()
 
@@ -30,6 +32,7 @@ function build_private_api_router(mongoose_instance,config){
         res.status(200).send("Testing private API")
     })
     private_api_routeHandler.use("/getEmail",getEmail)
+    private_api_routeHandler.use("/settings",settings)
 
 
 
