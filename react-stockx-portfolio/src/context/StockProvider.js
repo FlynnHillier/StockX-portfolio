@@ -401,6 +401,7 @@ export const StockProvider = ({children}) => {
     return (
         <StockContext.Provider value={{
             currentStock,
+            setCurrentStock,
             currentStockIsInitialised,
             currentStock_init,
             currentStock_addItems,
