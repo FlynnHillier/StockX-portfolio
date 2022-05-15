@@ -1,6 +1,5 @@
 const axios = require("axios")
-
-
+const fs = require('fs')
 
 axios.defaults.headers.common = {
         "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
@@ -9,14 +8,75 @@ axios.defaults.headers.common = {
 
 axios.defaults.baseURL = "https://stockx.com/"
 
-const currencyCode = "GBP"
-const countryCode = "GB"
 
+const currencyCode = "GBP"
+const countryCode = "GB" 
+
+let proxies = {
+        lastUsed:0,
+        proxyList:proxyInit(`${__dirname}/proxies.txt`)
+    }
+
+function proxyInit(proxyFilePath){
+    try {
+        const x = fs.accessSync(proxyFilePath,fs.constants.R_OK)
+    } catch(err){
+        throw Error("proxies.txt does not exist, or access has been denied for reading.")
+    }
+
+
+    let proxies = []
+    let lineReader = require('readline').createInterface({
+        input:fs.createReadStream(proxyFilePath)
+    });
+
+    lineReader.on('line', function (line) {
+        let proxyInfo = line.split(":")
+        if(proxyInfo.length !== 4){
+            throw Error(
+                `Proxy provided was not in format 'host:port:username:password'. \n failed on: '${line}'`
+            )
+        } else{
+            proxies.push(proxyInfo)
+        }
+    });
+
+
+    return proxies
+}
+
+
+
+function proxyRotate(){
+    if(proxies.proxyList.length === 0){
+        return
+    }
+
+    const lastUsedIndex = proxies.lastUsed
+    const proxyList = proxies.proxyList
+
+    const targetIndex = lastUsedIndex === proxyList.length - 1 ? 0 : lastUsedIndex + 1
+    
+    const proxyForUse = proxyList[targetIndex]
+
+    axios.defaults.proxy = {
+        host: proxyForUse[0],
+        port: proxyForUse[1],
+        auth:{
+            username:proxyForUse[2],
+            password:proxyForUse[3]
+        }
+    }
+
+    proxies.lastUsed = targetIndex
+    console.log(proxyForUse)
+}
 
 
 
 
 function search_item(search_term,max_results=4){
+    proxyRotate()
     return new Promise((resolves,rejects)=>{
 
         if(!Number.isInteger(max_results)){
@@ -85,6 +145,7 @@ function search_item(search_term,max_results=4){
 
 
 function get_product_info(product_urlKey){
+    proxyRotate()
     return new Promise((resolves,rejects)=>{
         axios({
             url:"/p/e",
@@ -124,6 +185,7 @@ function get_product_info(product_urlKey){
 
 
 function get_product_specific_sizing(sizes=[],urlKey){
+    proxyRotate()
     return new Promise((resolves,rejects)=>{
         
         for(let size of sizes){
@@ -191,13 +253,14 @@ function get_product_specific_sizing(sizes=[],urlKey){
 
 
 function get_product_metaInfo(product_urlKey){
+    proxyRotate()
     return new Promise((resolves,rejects)=>{
         axios({
             url:"/p/e",
             method:"post",
             data:{
                     operationName: "GetProduct",
-                    query:"query GetProduct($id: String!, $currencyCode: CurrencyCode, $countryCode: String!, $marketName: String) { product(id: $id) { id listingType urlKey media { imageUrl } ...ProductSchemaFragment } }  fragment ProductSchemaFragment on Product { id urlKey productCategory brand model title condition styleId media { thumbUrl imageUrl __typename } market(currencyCode: $currencyCode) { bidAskData(country: $countryCode, market: $marketName) { numberOfBids numberOfAsks } __typename } variants { hidden traits { size } } }",
+                    query:"query GetProduct($id: String!, $currencyCode: CurrencyCode, $countryCode: String!, $marketName: String) { product(id: $id) { id listingType urlKey media { imageUrl } ...ProductSchemaFragment ...ProductDetailsFragment } }  fragment ProductDetailsFragment on Product { traits { name value } } fragment ProductSchemaFragment on Product { id urlKey productCategory brand model title condition styleId media { thumbUrl imageUrl __typename } market(currencyCode: $currencyCode) { bidAskData(country: $countryCode, market: $marketName) { numberOfBids numberOfAsks } __typename } variants { hidden traits { size } } }",
                     variables:{
                         countryCode: countryCode,
                         currencyCode: currencyCode,
