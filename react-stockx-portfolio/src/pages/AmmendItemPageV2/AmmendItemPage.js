@@ -1,10 +1,41 @@
 import React,{useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import { ArrowRight } from 'react-bootstrap-icons'
+import ReactRouterPrompt from "react-router-prompt"
 
-import { Row,Col, ButtonGroup,Button,Container,Card,ListGroup,Badge } from 'react-bootstrap'
+import axios_default from '../../api/axios'
+
+import { Row,Col, ButtonGroup,Button,Container,Card,ListGroup,Badge,Modal } from 'react-bootstrap'
 import ItemPageStandard from '../../components/stock/ItemPageStandard'
 
+
+
+const OnPageLeave = ({isChanges}) => {
+    return (
+      <ReactRouterPrompt
+       when={isChanges}
+      >
+      {({ isActive, onConfirm, onCancel }) => (
+      <Modal show={isActive}>
+        <Modal.Title>
+          Unsaved changes.
+        </Modal.Title>
+        <Modal.Body>
+          are you sure you want to leave? any changes you have made are not saved.
+        </Modal.Body>
+        <Modal.Footer>
+            <Button variant="secondary" onClick={onCancel}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={onConfirm}>
+              confirm leave
+            </Button>
+          </Modal.Footer>
+      </Modal>
+    )}
+    </ReactRouterPrompt>
+    )
+}
 
 
 const QtyChangeBadge = ({qtychange,fontSize}) => {
@@ -71,27 +102,130 @@ const SizingSelector = ({sizingData,selectedSize,setSelectedSize}) => {
   }
 
 
+  const AddNewSizeModal = ({
+    isActive,
+    setIsActive,
+    handleAddSize,
+    sizes
+  }) => {
+    function handleClose(){
+      setIsActive(false)
+    }
+  
+    const maxSize = 14
+    const minSize = 4
 
-  const AddNewSizeButton = ({}) => {
+    let currentlyOwnedSizes = []
+    for(let sizeObj of sizes){
+      currentlyOwnedSizes.push(sizeObj.size)
+    }
+  
+    let sizesAvailableForAdd = []
+    for(let c = minSize; c <= maxSize;c += 0.5){
+      if(!(currentlyOwnedSizes.includes(c))){
+        sizesAvailableForAdd.push(
+            {size:c}
+          )
+      }
+    }
+  
+    let [selectedSizeForAdd,setSelectedSizeForAdd] = useState(sizesAvailableForAdd[0].size)
+    return ( 
+      <Modal show={isActive}>
+        <Modal.Title>
+          Add new size
+        </Modal.Title>
+        <Modal.Body>
+          <SizingSelector
+            sizingData={sizesAvailableForAdd}
+            selectedSize={selectedSizeForAdd}
+            setSelectedSize={setSelectedSizeForAdd}
+          />
+          <p className='text-muted'>sizes displayed may not acctually exist.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button onClick={handleClose}>
+            close
+          </Button>
+          <Button onClick={()=>{
+            handleAddSize(selectedSizeForAdd)
+          }}>
+            add
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    )
+  }
+
+
+
+  const AddNewSizeButton = ({
+      setSizes,
+      sizes,
+      setSelectedSize,
+      setChanges,
+      commitChangeToServer
+  }) => {
+
+
+
+    let [showModal,setShowModal] = useState(false)
+
+    function addNewSize(size){
+        setSizes((prevState)=>{
+            let detached_prevState = JSON.parse(JSON.stringify(prevState))
+
+            detached_prevState.push({
+                size:size,
+                qty:0,
+                isNew:true,
+            })
+
+            return detached_prevState
+        })
+
+        setChanges((prevState)=>{
+          let detached_prevState = JSON.parse(JSON.stringify(prevState))
+
+          detached_prevState.push({
+              size:size,
+              qtyChange:1,
+              newFinalQty:1
+          })
+
+          return detached_prevState
+      })
+
+        setSelectedSize(size)
+    }
 
     return (
-        <ButtonGroup className="d-flex">
+        <>
+          <AddNewSizeModal
+            isActive={showModal}
+            setIsActive={setShowModal}
+            handleAddSize={addNewSize}
+            sizes={sizes}
+          />
+          <ButtonGroup className="d-flex">
             <Button
                 variant="success"
                 onClick={()=>{
-                    
+                    setShowModal(true)
                 }}
             >
                 add another size.
             </Button>
         </ButtonGroup>
+        </>
     )
 
   }
 
   const ChangesDisplay = ({
       unsavedChanges,
-      setUnsavedChanges
+      setUnsavedChanges,
+      onSaveChanges
   }) => {
 
 
@@ -172,6 +306,7 @@ const SizingSelector = ({sizingData,selectedSize,setSelectedSize}) => {
             >
                 <Button
                 variant='success'
+                onClick={onSaveChanges}
                 >
                 save changes
                 </Button>
@@ -265,6 +400,7 @@ const SizingSelector = ({sizingData,selectedSize,setSelectedSize}) => {
     selectedSize,
     itemData,
     changes,
+    sizes,
     stageQtyChange,
   }) =>{
 
@@ -275,7 +411,7 @@ const SizingSelector = ({sizingData,selectedSize,setSelectedSize}) => {
         if(selectedSize === null){
             return
         }
-        const targetSizeObj = itemData.sizes.find((sizeObj)=>sizeObj.size === selectedSize)
+        const targetSizeObj = sizes.find((sizeObj)=>sizeObj.size === selectedSize)
         if(targetSizeObj === undefined){
             throw Error("selected size could not be located within itemData sizes array.")
         }
@@ -288,9 +424,6 @@ const SizingSelector = ({sizingData,selectedSize,setSelectedSize}) => {
         if(stagedChange !== undefined){
             proposedQtyChange = stagedChange.qtyChange
         }
-
-
-        console.log(targetSizeObj.qty + proposedQtyChange)
 
         setSelectedSize_stagedQty(targetSizeObj.qty + proposedQtyChange)
     },[selectedSize,changes])
@@ -306,10 +439,12 @@ const SizingSelector = ({sizingData,selectedSize,setSelectedSize}) => {
 
 
 
-const AmmendItemPage = ({itemData}) => {
+const AmmendItemPage = ({itemData,setCurrentStockIsInitialised}) => {
     let [selectedSize,setSelectedSize] = useState(null)
     let [changes,setChanges] = useState([])
-
+    let [sizes,setSizes] = useState(itemData.sizes)
+    let [errorMessage,setErrorMessage] = useState("")
+    let [pageIsActive,setPageIsActive] = useState(true)
 
     function stageQtyChange(size,qty){
         setChanges((prevState)=>{
@@ -336,8 +471,7 @@ const AmmendItemPage = ({itemData}) => {
             }
 
 
-            let targetSizeObj = itemData.sizes.find((sizeObj) => sizeObj.size === size)
-
+            let targetSizeObj = sizes.find((sizeObj) => sizeObj.size === size)
             if(targetSizeObj === undefined){
                 throw Error("sizeObj couldnt be located for selected size")
             }
@@ -349,57 +483,178 @@ const AmmendItemPage = ({itemData}) => {
                 targetChangeObj.qtyChange += (-1 * targetChangeObj.newFinalQty)
                 targetChangeObj.newFinalQty = 0
             }
-
-            console.log(detached_prevState)
+            
             return detached_prevState
         })
+    } 
+
+
+
+    function commitChangesToServer(){
+      return new Promise(async (resolve,reject)=>{
+        let sizeQty_ForIncrease = []
+        let sizeQty_ForDecrease = []
+        const urlKey = itemData.urlKey
+        const imgURL = itemData.imgURL
+        const title = itemData.title
+        const colour = itemData.colour
+        for(let change of changes){
+          if(change.qtyChange > 0){
+            sizeQty_ForIncrease.push(
+              {
+                size:change.size,
+                qty:change.qtyChange
+              }
+            )
+          }
+          if(change.qtyChange < 0){
+            sizeQty_ForDecrease.push(
+              {
+                size:change.size,
+                qty:(change.qtyChange) * -1
+              }
+            )
+          }
+
+          if(change.qtyChange == 0){
+            console.log("qtyChange is 0 - should not occur. Logic error.")
+          }
+        }
+
+        function buildQuery(urlKey,updateData){
+          return {
+            updates:[
+              {
+                imgURL:imgURL,
+                title:title,
+                colour:colour,
+                urlKey:urlKey,
+                sizes:updateData
+              }
+            ]
+          }
+        }
+
+        const incQuery = buildQuery(urlKey,sizeQty_ForIncrease)
+        const decQuery = buildQuery(urlKey,sizeQty_ForDecrease)
+
+        let pendingPromises = []
+        function buildRequest(url,payload){
+          return new Promise((resolve,reject)=>{
+            axios_default.post(
+                url,
+                payload,
+                {
+                  headers:{
+                    "content-type":"application/json"
+                  }
+                }
+              )
+              .catch((err)=>{
+                reject(
+                  {
+                    message:"error on request.",
+                    error:err
+                  }
+                )
+              })
+              .then((response)=>{
+                if(response.data.result === true){
+                  resolve()
+                } else{
+                  reject(
+                    {
+                      message:"server responded with response result not true",
+                      response:response.data
+                    }
+                  )
+                }
+              })
+          })
+        }
+
+        if(sizeQty_ForDecrease.length !== 0){
+          pendingPromises.push(buildRequest("/api/private/stock/item/remove",decQuery))
+        }
+        if(sizeQty_ForIncrease.length !== 0){
+          pendingPromises.push(buildRequest("/api/private/stock/item/add",incQuery))
+        }
+
+        await Promise.all(pendingPromises)
+        .catch((err)=>{
+          reject(err)
+        })
+
+        resolve()
+      })
+   }
+
+
+   async function onSaveChanges(){
+    try {
+      const serverResponse = await commitChangesToServer()
+      setCurrentStockIsInitialised(false)
+    } catch(err){
+      console.error(err)
+      setErrorMessage("an error occured while attempting to save your changes.")
     }
+   }
 
 
 
 
 
     return (
-        <ItemPageStandard
-            itemTitle={itemData.title}
-            itemColour={itemData.colour}
-            itemImgURL={itemData.imgURL}
-            ImageFooterElem={() => {
-                return (
-                <Row className={"gy-3"}>
-                    <Col xs={12}>
-                        <SizingSelector
-                            sizingData={itemData.sizes}
-                            setSelectedSize={setSelectedSize}
+        <>
+            <OnPageLeave
+                isChanges={changes.length !== 0}
+            />
+            <ItemPageStandard
+                itemTitle={itemData.title}
+                itemColour={itemData.colour}
+                itemImgURL={itemData.imgURL}
+                ImageFooterElem={() => {
+                    return (
+                    <Row className={"gy-3"}>
+                        <Col xs={12}>
+                            <SizingSelector
+                                sizingData={sizes}
+                                setSelectedSize={setSelectedSize}
+                                selectedSize={selectedSize}
+                            />
+                        </Col>
+                        <Col xs={12}>
+                            <AddNewSizeButton
+                                 setSizes={setSizes}
+                                 sizes={sizes}
+                                 setSelectedSize={setSelectedSize}
+                                 setChanges={setChanges}
+                            />
+                        </Col>
+                    </Row>
+                    )
+                }}
+            >
+                <Row>
+                    <Col xs={8}>
+                        <Stage
                             selectedSize={selectedSize}
+                            itemData={itemData}
+                            changes={changes}
+                            sizes={sizes}
+                            stageQtyChange={stageQtyChange}
                         />
                     </Col>
-                    <Col xs={12}>
-                        <AddNewSizeButton/>
+                    <Col>
+                        <ChangesDisplay
+                            unsavedChanges={changes}
+                            setUnsavedChanges={setChanges}
+                            onSaveChanges={onSaveChanges}
+                        />
                     </Col>
                 </Row>
-                )
-            }}
-        >
-            <Row>
-                <Col xs={8}>
-                    <Stage
-                        selectedSize={selectedSize}
-                        itemData={itemData}
-                        changes={changes}
-                        stageQtyChange={stageQtyChange}
-                    />
-                </Col>
-                <Col>
-                    <ChangesDisplay
-                        unsavedChanges={changes}
-                        setUnsavedChanges={setChanges}
-                    />
-                </Col>
-            </Row>
-
-
-        </ItemPageStandard>
+            </ItemPageStandard>
+        </>
     )
 }
 

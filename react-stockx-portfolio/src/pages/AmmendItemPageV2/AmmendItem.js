@@ -16,20 +16,21 @@ const AmmendItem = ({}) => {
     const navigate = useNavigate()
     const location = useLocation()
     const {itemID} = useParams()
-    const {currentStock} = useContext(StockContext)
+    const {currentStock,setCurrentStockIsInitialised} = useContext(StockContext)
 
     function pageInit(){
         function getItemData(){
+            const itemDataFromCurrentStockContext = currentStock.find((item)=>item.urlKey === itemID)
+            if(itemDataFromCurrentStockContext !== undefined){
+                return itemDataFromCurrentStockContext
+            }
+
             if(location.state){
                 if(location.state.currentItemData !== undefined){
                     return location.state.currentItemData
                 }
             }
 
-            const itemDataFromCurrentStockContext = currentStock.find((item)=>item.urlKey === itemID)
-            if(itemDataFromCurrentStockContext !== undefined){
-                return itemDataFromCurrentStockContext
-            }
 
             return null
         }
@@ -37,6 +38,9 @@ const AmmendItem = ({}) => {
         if(retrievedItemData === null){
             navigate("/stock/current")
         }
+
+        console.log(retrievedItemData)
+
         setCurrentItemData(retrievedItemData)
         setPageIsLoading(false)
     }
@@ -62,9 +66,8 @@ const AmmendItem = ({}) => {
                 :
                 <AmmendItemPage
                     itemData = {currentItemData}
-                >
-
-                </AmmendItemPage>                 
+                    setCurrentStockIsInitialised={setCurrentStockIsInitialised}
+                />                 
             }
         </>
     )
