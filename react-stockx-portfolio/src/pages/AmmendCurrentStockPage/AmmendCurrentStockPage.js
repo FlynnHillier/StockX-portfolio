@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import { InputGroup,Button,FormControl ,Container, Row, Col,Card,Image, ListGroup,Modal,Spinner} from 'react-bootstrap'
 import "./style.css"
 
+import {useNavigate} from "react-router-dom"
+
 import axios_default from '../../api/axios'
 
 
@@ -132,6 +134,8 @@ const ModalLoading = ({show}) => {
 
 
 const AmmendCurrentStockPage = props => {
+    const navigate = useNavigate()
+
     let [currentSearchQuery,setCurrentSearchQuery] = useState("")
     let [searchAllowed,setSearchAllowed] = useState(true)
     let [searchIsPending,setSearchIsPending] = useState(false)
@@ -143,6 +147,15 @@ const AmmendCurrentStockPage = props => {
     let [selectedItemData,setSelectedItemData] = useState(null)
     let [isLoadingItemData,setIsLoadingItemData] = useState(false)
 
+    function formatMetaInfoForAmmendPage(metaInfo){
+        let objForReturn = {}
+        objForReturn.imgURL = metaInfo.media.imageUrl
+        objForReturn.colour = metaInfo.colour
+        objForReturn.title = metaInfo.title
+        objForReturn.urlKey = metaInfo.urlKey
+        objForReturn.sizes = []
+        return objForReturn
+    }
 
     function retrieveItemMetaInfo(urlKey){
         return new Promise(async (resolve,reject)=>{
@@ -174,9 +187,15 @@ const AmmendCurrentStockPage = props => {
                     }
                     selectableSizes.push(variant.traits.size)
                 }
-
                 metaInfo.variants = undefined
                 metaInfo.selectableSizes = selectableSizes
+
+                //traits
+                const traits = metaInfo.traits
+                metaInfo.styleCode = traits.find((trait)=>trait.name === "Style").value
+                metaInfo.colour = traits.find((trait)=>trait.name === "Colorway").value
+                
+                metaInfo.traits = undefined
 
                 resolve(metaInfo)
         })
@@ -192,8 +211,6 @@ const AmmendCurrentStockPage = props => {
             setItemIsSelected(true)
             const data = await retrieveItemMetaInfo(urlKey)
             setSelectedItemData(data)
-            
-
         } catch(err){
             setItemIsSelected(false)
             console.error(err)
@@ -242,8 +259,18 @@ const AmmendCurrentStockPage = props => {
 
 
     useEffect(()=>{
-        console.log(resultantSearchedData)
-    },[resultantSearchedData])
+
+        if(selectedItemData !== null){
+            navigate(
+                `../view/${selectedItemData.urlKey}/ammend`,
+                {
+                    state:{
+                        currentItemData:formatMetaInfoForAmmendPage(selectedItemData)
+                    }
+                }
+            )
+        }
+    },[selectedItemData])
 
     useEffect(()=>{
         if(searchIsPending === true){
@@ -254,21 +281,12 @@ const AmmendCurrentStockPage = props => {
         }
     },[searchIsPending])
 
-    useEffect(()=>{
-        if(itemIsSelected === true){
-
-        }
-
-        if(itemIsSelected === false){
-            
-        }
-    },[itemIsSelected])
-
     return (
         <>
             <ModalLoading
                 show={isLoadingItemData}
             />
+
             <Row>
                 <Col>
                 </Col>
