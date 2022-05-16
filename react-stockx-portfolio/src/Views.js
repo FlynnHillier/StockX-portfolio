@@ -4,7 +4,7 @@ import React from 'react'
 import ProtectedRoutes from "./routers/ProtectedRoutes"
 import OpenRoutes from "./routers/OpenRoutes"
 import StockRouter from "./routers/StockRouting"
-
+import SettingsRoutes from "./routers/SettingsRoutes"
 
 import LoginContent from "./pages/login/LoginContent"
 import SignupContent from "./pages/signup/SignupContent"
@@ -30,6 +30,7 @@ const Views = () => {
             <Route path="login" element={<LoginContent/>}/>
           </Route>
           <Route  element={<ProtectedRoutes/>}>
+          <Route element={<SettingsRoutes/>}>
               <Route path="/settings" element={<SettingsPage/>}/>
               <Route path="/stock">
                 <Route path="current" element={<StockRouter/>}>
@@ -41,6 +42,7 @@ const Views = () => {
               </Route>
               <Route path="/priv" element={<>This is bye</>}/>
               <Route path="/logout" element={<Logout/>}/>
+          </Route>
           </Route>
           <Route path="/*" element={<PageNotFound/>}/>
     </Routes>

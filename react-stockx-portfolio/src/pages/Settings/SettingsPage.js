@@ -157,7 +157,6 @@ const SettingsPage = ({}) => {
         const updatedSettingsObj = buildUpdatedSettingsObj(changes,settings)
         try {
             const updatedSettings = await commitToServer(updatedSettingsObj)
-            console.log(updatedSettings)
             setChanges([])
         } catch(err){
             console.error(err)
@@ -167,63 +166,51 @@ const SettingsPage = ({}) => {
   }
 
 
-  useEffect(()=>{
-    console.log(changes)
-  },[changes])
-
-
   return (
     <>  
-        {
-            settings === null ?
-            <>Loading settings...</>
-            :
-            <>
-                <OnPageLeave
-                    isChanges={changes.length !== 0}
-                />
-                <Row>
-                    <Col>
-                    </Col>
-                    <Col 
-                        xs={10}  
-                        sm={8} 
-                        xl={6}
-                        className="text-center d-flex justify-content-center"
+        <OnPageLeave
+            isChanges={changes.length !== 0}
+        />
+        <Row>
+            <Col>
+            </Col>
+            <Col 
+                xs={10}  
+                sm={8} 
+                xl={6}
+                className="text-center d-flex justify-content-center"
+            >
+                <Container fluid>
+                    <form 
+                        className='border-0'
+                        onSubmit={onFormSubmit}
                     >
-                        <Container fluid>
-                            <form 
-                                className='border-0'
-                                onSubmit={onFormSubmit}
-                            >
-                                <Card>
-                                    <Card.Header as={"h3"}>
-                                        Settings
-                                    </Card.Header>
-                                    <Card.Body>
-                                        <SettingsDisplay
-                                            settingsData={settings}
-                                            setSettingsData={setSettings}
-                                            setChanges={setChanges}
-                                        />
-                                    </Card.Body>
-                                    <Card.Footer className="d-flex justify-content-start">
-                                        <button
-                                            disabled={changes.length === 0}
-                                            className='btn btn-success my-1'
-                                        >
-                                            Save
-                                        </button>
-                                    </Card.Footer>
-                                </Card>
-                            </form>
-                        </Container>
-                    </Col>
-                    <Col>
-                    </Col>
-                </Row>
-            </>
-        }
+                        <Card>
+                            <Card.Header as={"h3"}>
+                                Settings
+                            </Card.Header>
+                            <Card.Body>
+                                <SettingsDisplay
+                                    settingsData={settings}
+                                    setSettingsData={setSettings}
+                                    setChanges={setChanges}
+                                />
+                            </Card.Body>
+                            <Card.Footer className="d-flex justify-content-start">
+                                <button
+                                    disabled={changes.length === 0}
+                                    className='btn btn-success my-1'
+                                >
+                                    Save
+                                </button>
+                            </Card.Footer>
+                        </Card>
+                    </form>
+                </Container>
+            </Col>
+            <Col>
+            </Col>
+        </Row>
     </>
   )
 }

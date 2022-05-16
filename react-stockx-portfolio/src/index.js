@@ -4,14 +4,16 @@ import App from "./App.js"
 
 import {AuthProvider} from './context/AuthProvider'
 import {StockProvider} from "./context/StockProvider"
-
+import {SettingsProvider} from "./context/SettingsProvider"
 
 
 ReactDOM.render(
     <React.StrictMode>
         <StockProvider>
             <AuthProvider>
-                <App/>
+                <SettingsProvider>
+                    <App/>
+                </SettingsProvider>
             </AuthProvider>
         </StockProvider>
     </React.StrictMode>,
