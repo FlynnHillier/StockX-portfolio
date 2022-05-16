@@ -32,7 +32,7 @@ const StatTotalsTable = ({totalAsk,totalBid,totalSale}) => {
 
 const StatTotalsView = ({totalValData,isItems,children}) => {
     return ( 
-        <Container fluid>
+        <Container fluid className="mb-3">
             <Card className="w-100 text-center">
                 <Card.Title as={"h3"}>
                     Summary

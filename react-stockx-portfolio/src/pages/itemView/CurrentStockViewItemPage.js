@@ -7,7 +7,7 @@ import { useParams,useNavigate } from 'react-router-dom'
 
 import { useContext } from 'react'
 import StockContext from '../../context/StockProvider'
-
+import SettingsContext from '../../context/SettingsProvider'
 
 
 import { Row,Col,Container,Card,ListGroup,Badge,Button } from 'react-bootstrap'
@@ -67,7 +67,7 @@ const SizingSelector = ({sizingData,selectedSize,setSelectedSize}) => {
 
 
 
-const SingleSizeInfoDisplay = ({sizeData}) => {
+const SingleSizeInfoDisplay = ({sizeData,feeMultiplier}) => {
 
   return (
     <Card
@@ -99,13 +99,30 @@ const SingleSizeInfoDisplay = ({sizeData}) => {
             className="list-group-flush"
           >
             <ListGroup.Item>
-            <p1> <span className='fw-bold'> Collective Ask </span> £{sizeData.lowestAsk * sizeData.qty} </p1> 
+            <p1> <span className='fw-bold'>Ask after fee </span> £{Math.round(sizeData.lowestAsk  * feeMultiplier * 100) / 100} </p1> 
             </ListGroup.Item>
             <ListGroup.Item>
-            <p1> <span className='fw-bold'> Collective Bid </span> £{sizeData.highestBid * sizeData.qty} </p1> 
+            <p1> <span className='fw-bold'>Bid after fee </span> £{Math.round(sizeData.highestBid  * feeMultiplier * 100) / 100} </p1> 
             </ListGroup.Item>
             <ListGroup.Item>
-            <p1> <span className='fw-bold'> Collective Last sale </span> £{sizeData.lastSale * sizeData.qty} </p1> 
+            <p1> <span className='fw-bold'>Last sale after fee </span> £{Math.round(sizeData.lastSale  * feeMultiplier * 100) / 100} </p1> 
+            </ListGroup.Item>
+            
+          </ListGroup>
+        </div>
+        <div className='mt-3'>
+          <ListGroup
+
+            className="list-group-flush"
+          >
+            <ListGroup.Item>
+            <p1> <span className='fw-bold'> Collective Ask after fee </span> £{Math.round(sizeData.lowestAsk  * feeMultiplier * sizeData.qty *  100) / 100} </p1> 
+            </ListGroup.Item>
+            <ListGroup.Item>
+            <p1> <span className='fw-bold'> Collective Bid after fee </span> £{Math.round(sizeData.highestBid  * feeMultiplier * sizeData.qty *  100) / 100} </p1> 
+            </ListGroup.Item>
+            <ListGroup.Item>
+            <p1> <span className='fw-bold'> Collective Last sale after fee </span> £{Math.round(sizeData.lastSale  * feeMultiplier * sizeData.qty *  100) / 100} </p1> 
             </ListGroup.Item>
             
           </ListGroup>
@@ -159,9 +176,7 @@ const AmmendItemButton = ({currentItemData}) => {
 
 
 
-const ItemSummary = ({currentItemData}) => {
-
-
+const ItemSummary = ({currentItemData,feeMultiplier}) => {
 
   let totalAskValue = 0
   let totalBidValue = 0
@@ -200,7 +215,7 @@ const ItemSummary = ({currentItemData}) => {
           border="light"
         >
           <Card.Title as="h6">
-            Total value when sold at:
+            Total value, no fees:
           </Card.Title>
           <Card.Body>
             <ListGroup
@@ -217,6 +232,25 @@ const ItemSummary = ({currentItemData}) => {
               </ListGroupItem>
             </ListGroup>
           </Card.Body>
+          <Card.Title as="h6">
+          Total value, fees:
+          </Card.Title>
+          <Card.Body>
+            <ListGroup
+              className="list-group-flush"
+            >
+              <ListGroupItem>
+                <p1 className="fw-bold">  Ask: £{Math.round(totalAskValue * feeMultiplier * 100) /100}</p1>
+              </ListGroupItem>
+              <ListGroupItem>
+                <p1 className="fw-bold">  Bid: £{Math.round(totalBidValue * feeMultiplier * 100) /100}</p1>
+              </ListGroupItem>
+              <ListGroupItem>
+              <p1 className="fw-bold">  Last Sale: £{Math.round(totalSaleValue * feeMultiplier * 100) /100}</p1>
+              </ListGroupItem>
+            </ListGroup>
+          </Card.Body>
+
         </Card>
         <AmmendItemButton
           currentItemData={currentItemData}
@@ -249,6 +283,10 @@ const ItemSummary = ({currentItemData}) => {
 
 
 const CurrentStockViewItem = ({currentStock,itemID}) => {
+
+  const {settings} = useContext(SettingsContext)
+  const feeMultiplier = (1-(settings.fee / 100))
+
   let [currentItemData,setCurrentItemData] = useState({})
   let [isLoading,setIsLoading] = useState(true)
   let [sizingData,setSizingData] = useState([])
@@ -266,7 +304,7 @@ const CurrentStockViewItem = ({currentStock,itemID}) => {
 
   function updateDisplayedSize(){
     let selectedSizeData = sizingData.find((sizeObj)=>sizeObj.size === selectedSize)
-    setDisplaySizeElement(<SingleSizeInfoDisplay sizeData={selectedSizeData}/>)
+    setDisplaySizeElement(<SingleSizeInfoDisplay sizeData={selectedSizeData} feeMultiplier={feeMultiplier}/>)
   }
 
 
@@ -341,6 +379,7 @@ const CurrentStockViewItem = ({currentStock,itemID}) => {
           <Col xxl={4} xl={5} lg={6} md={5} xs={12}>
                 <ItemSummary
                   currentItemData={currentItemData}
+                  feeMultiplier={feeMultiplier}
                 />
           </Col>
       </Row>
