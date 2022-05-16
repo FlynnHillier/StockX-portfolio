@@ -324,9 +324,7 @@ export const StockProvider = ({children}) => {
                                 })
                             })
                             .then((resolutionData)=>{
-
-
-                                    const targetItemInStock = loadedStock.find((itemInStock)=>itemInStock.urlKey === itemForLoad.urlKey)
+                                    let targetItemInStock = loadedStock.find((itemInStock)=>itemInStock.urlKey === itemForLoad.urlKey)
 
                                     if(resolutionData.productFound === false){
                                         targetItemInStock.exists = false
@@ -335,9 +333,8 @@ export const StockProvider = ({children}) => {
                                     if(resolutionData.productFound === true){
                                         targetItemInStock.exists = true
 
-
                                         for(let info of resolutionData.sizesInfo){
-                                            const targetSizeObj = targetItemInStock.sizes.find((sizeObj)=>sizeObj.size === info.size)
+                                            let targetSizeObj = targetItemInStock.sizes.find((sizeObj)=>sizeObj.size === info.size)
                                             targetSizeObj.lowestAsk = info.lowestAsk
                                             targetSizeObj.highestBid = info.highestBid
                                             targetSizeObj.lastSale = info.lastSale
@@ -353,7 +350,6 @@ export const StockProvider = ({children}) => {
                                     error:err
                                 }
 
-                                console.log("in here")
                                 errors.push(
                                     error
                                 )
