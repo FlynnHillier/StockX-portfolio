@@ -1,7 +1,7 @@
 import { createContext,useEffect,useState } from "react";
 
-import axios from "./../api/axios"
-
+import axios_default from "./../api/axios";
+import axios from "axios";
 
 
 
@@ -10,385 +10,86 @@ const StockContext = createContext({})
 export const StockProvider = ({children}) => {
 
     let [currentStock,setCurrentStock] = useState([])
-    let [currentStockIsLoaded,setCurrentStockIsLoaded] = useState(false)
-    let [currentStockPricesLoaded,setCurrentStockPricesLoaded] = useState(false)
     let [currentStockIsInitialised,setCurrentStockIsInitialised] = useState(false)
 
 
 
-    const currentStock_load = () => {
-        return new Promise(async(resolve,reject)=>{
-            let serverResponse
 
-            if(currentStockIsLoaded === false){
-                serverResponse = await axios.get(
-                    "api/private/stock/current"
-                )
 
-                if(serverResponse.status !== 200){
-                    reject({
-                        message:"server responded with a response that was not 200",
-                        serverResponse:serverResponse.status
-                    })
+    const currentStock_init = async () =>{
+
+        async function loadItemPricing(sizes,urlKey){
+            const pricing = await axios_default.post(
+                "api/private/stockx/pricing",
+                {
+                    urlKey:urlKey,
+                    sizes:sizes
                 }
+            )
+            return pricing.data.data
+        }
+
+        function applyPricingData(itemForPriceLoad){
+            return new Promise(async (resolve,reject)=>{
+                const urlKey = itemForPriceLoad.urlKey
+
+                let sizesForLoad = []
+                for(let sizeObj of itemForPriceLoad.sizes){
+                    sizesForLoad.push(sizeObj.size)
+                }
+
+                const pricingData = await loadItemPricing(sizesForLoad,urlKey)
+
+
+                if(pricingData.productFound === false){
+                    return resolve(itemForPriceLoad)
+                }
+
+                for(let info of pricingData.sizesInfo){
+                    let targetSizeObj = itemForPriceLoad.sizes.find((sizeObj)=>sizeObj.size === info.size)
+                    targetSizeObj.lowestAsk = info.lowestAsk
+                    targetSizeObj.highestBid = info.highestBid
+                    targetSizeObj.lastSale = info.lastSale
+                }
+                resolve(itemForPriceLoad)
+            })
+        }
+
+        try {
+            const serverResponse = await axios_default.get(
+                "api/private/stock/current"
+            )
+
+            if(serverResponse.status !== 200){
+                throw Error({
+                    message:"server responded with a response that was not 200",
+                    serverResponse:serverResponse.status
+                })
             }
-            
-            
-            let retrievedCurrentStock = serverResponse.data
 
-            for(let item of retrievedCurrentStock){ //set total qty of item
+            let retrievedStock = serverResponse.data
+
+            for(let item of retrievedStock){ //set total qty of item
                 item.qty = 0
-
                 for(let sizeObj of item.sizes){
                     item.qty += sizeObj.qty
                 }
-
-            }
-
-            setCurrentStock(currentStockIsLoaded ? currentStock : retrievedCurrentStock)
-            setCurrentStockIsLoaded(true)
-
-            resolve(retrievedCurrentStock)
-        })
-    }
-
-
-
-
-    const currentStock_loadPricingData = (urlKeysToLoad=[]) => { //itemsToLoad array of url-keys to load pricings
-        return new Promise((resolve,reject)=>{
-
-            if(Array.isArray(urlKeysToLoad) === false){
-
-                return reject({
-                    message:"passed array must contain soley urlKey's that are currently present within currentStock"
-                })
-            } 
-            
-
-            let itemsToLoad = []
-
-            for(let urlKeyForLoad of urlKeysToLoad){
-                const matchingItem = currentStock.find((currentItem)=>currentItem.urlKey === urlKeyForLoad)
-                if(matchingItem === undefined){
-
-
-                    return reject({
-                        message:"urlKey provided for pricing data retrieval did not exist within user's currentStock context",
-                        currentStockObject:currentStock,
-                        urlKey:urlKeyForLoad
-                    })
-                }
-
-                if(matchingItem !== undefined){
-                    itemsToLoad.push(matchingItem)
-                }
             }
 
 
-            if(urlKeysToLoad.length === 0){//load pricing for all items in currentStock
-                itemsToLoad = currentStock
-            }
 
             let pendingPromises = []
-            let errors = []
-
-            for(let itemForLoad of itemsToLoad){
-
-
-                pendingPromises.push(
-                    new Promise(async (resolve,reject)=>{
-
-                        let sizes = []
-                        for(let sizeObj of itemForLoad.sizes){
-                            sizes.push(sizeObj.size)
-                        }
-
-                        const serverResponse = await axios.post(
-                            "api/private/stockx/pricing",
-                            {
-                                urlKey:itemForLoad.urlKey,
-                                sizes:sizes
-                            }
-                        ).catch((error)=>{
-                            reject(error)
-                        })
-                        
-
-                        const data = serverResponse.data.data
-
-                        resolve(data)
-                    })
-                    .then((resolutionData)=>{
-
-
-
-
-                        setCurrentStock((stock)=>{
-
-                            const targetItemInStock = stock.find((itemInStock)=>itemInStock.urlKey === itemForLoad.urlKey)
-
-                            if(resolutionData.productFound === false){
-                                targetItemInStock.exists = false
-                            }
-
-                            if(resolutionData.productFound === true){
-                                targetItemInStock.exists = true
-
-
-                                for(let info of resolutionData.sizesInfo){
-                                    const targetSizeObj = targetItemInStock.sizes.find((sizeObj)=>sizeObj.size === info.size)
-                                    targetSizeObj.lowestAsk = info.lowestAsk
-                                    targetSizeObj.highestBid = info.highestBid
-                                    targetSizeObj.lastSale = info.lastSale
-                                }
-
-                            }
-
-                            return stock
-                        })
-
-
-                    })
-                    .catch((err)=>{
-                        errors.push(
-                            {
-                                message:"error loading item pricing info",
-                                item:itemForLoad,
-                                error:err
-                            }
-                        )
-                        reject()
-                    })
-                )
-
+            for(let itemForPriceLoad of retrievedStock){
+                pendingPromises.push(applyPricingData(itemForPriceLoad))
             }
 
-
-            Promise.all(pendingPromises)
-            .then((_)=>{
-                resolve()
-                setCurrentStockPricesLoaded(true)
-            })
-            .catch((_)=>{
-                reject(
-                    {
-                        message:"error loading one or more items pricing Info",
-                        errors:errors
-                    }
-                )
-            })
-
-
-        })
-    }
-
-
-
-
-
-    const currentStock_addItems = async(items) => { //items to follow array schema of backend 'item' routes
-        
-        const serverResponse = await axios.post(
-            "api/private/stock/item/add",
-            {
-                updates:items
-            }
-        )
-
-
-
-        if(serverResponse.data.result !== true){
-            throw Error({
-                    message:"unexpected server response",
-                    sentData:{
-                        updates:items
-                    },
-                    serverResponse:serverResponse.data
-                })
+            await Promise.all(pendingPromises)
+            setCurrentStock(retrievedStock)
+            setCurrentStockIsInitialised(true)
+            return 
+        } catch(err){
+            throw(err)
         }
-
-        if(serverResponse.data.result === true) {
-
-            for(let item of items){
-
-                setCurrentStock((stock)=>{
-                    const existingItem = stock.find((existingItem)=>existingItem.urlKey === item.urlKey)
-                    
-                    const itemExists = !(existingItem === undefined)
-
-                    if(itemExists === true){
-                        
-                        for(let sizeObj of existingItem.sizes){
-
-                            const size = sizeObj.size
-                            const qtyForInc = sizeObj.qty
-
-                            const existingItemSizeObj = existingItem.sizes.find((existingSizeObj)=>existingSizeObj.size === size)
-                            const sizeObjExists =  !(existingItemSizeObj === undefined)
-
-                            if(sizeObjExists === true){
-                                existingItemSizeObj.qty += qtyForInc
-                            }
-
-                            if(sizeObjExists === false){
-                                existingItem.sizes.push(
-                                    {
-                                        size:size,
-                                        qty:qtyForInc
-                                    }
-                                )
-                            }
-
-                        }
-
-                    }
-
-                    if(itemExists === false){
-                        stock.push(item)
-                    }
-                })
-            }
-        }
-    }
-
-
-
-    const currentStock_init = () => {
-        return new Promise(async (resolve,reject)=>{
-                try {
-                
-                    const loadedStock = await new Promise(async(resolve,reject)=>{
-                        let serverResponse
-            
-                        serverResponse = await axios.get(
-                            "api/private/stock/current"
-                        )
-        
-                        if(serverResponse.status !== 200){
-                            reject({
-                                message:"server responded with a response that was not 200",
-                                serverResponse:serverResponse.status
-                            })
-                        }
-                        
-                        
-                        let retrievedCurrentStock = serverResponse.data
-            
-                        for(let item of retrievedCurrentStock){ //set total qty of item
-                            item.qty = 0
-            
-                            for(let sizeObj of item.sizes){
-                                item.qty += sizeObj.qty
-                            }
-            
-                        }
-            
-                        setCurrentStock(currentStockIsLoaded ? currentStock : retrievedCurrentStock)
-                        setCurrentStockIsLoaded(true)
-            
-                        resolve(retrievedCurrentStock)
-                    })
-
-
-    
-
-
-                    let pendingPromises = []
-                    let errors = []
-
-                    for(let itemForLoad of loadedStock){
-
-
-                        pendingPromises.push(
-                            new Promise(async (resolve,reject)=>{
-
-                                let sizes = []
-                                for(let sizeObj of itemForLoad.sizes){
-                                    sizes.push(sizeObj.size)
-                                }
-
-                                axios.post(
-                                    "api/private/stockx/pricing",
-                                    {
-                                        urlKey:itemForLoad.urlKey,
-                                        sizes:sizes
-                                    }
-                                )
-                                .then((serverResponse)=>{
-                                    resolve(serverResponse.data.data)
-                                })
-                                .catch((error)=>{
-                                    console.log("error caught!")
-                                    reject(error)
-                                })
-                            })
-                            .then((resolutionData)=>{
-                                    let targetItemInStock = loadedStock.find((itemInStock)=>itemInStock.urlKey === itemForLoad.urlKey)
-
-                                    if(resolutionData.productFound === false){
-                                        targetItemInStock.exists = false
-                                    }
-
-                                    if(resolutionData.productFound === true){
-                                        targetItemInStock.exists = true
-
-                                        for(let info of resolutionData.sizesInfo){
-                                            let targetSizeObj = targetItemInStock.sizes.find((sizeObj)=>sizeObj.size === info.size)
-                                            targetSizeObj.lowestAsk = info.lowestAsk
-                                            targetSizeObj.highestBid = info.highestBid
-                                            targetSizeObj.lastSale = info.lastSale
-                                        }
-
-                                    }
-
-                            })
-                            .catch((err)=>{
-                                const error = {
-                                    message:"error loading item pricing info",
-                                    item:itemForLoad,
-                                    error:err
-                                }
-
-                                errors.push(
-                                    error
-                                )
-
-                                reject(error)
-                            })
-                        )
-                    }
-
-
-                    Promise.all(pendingPromises)
-                    .then((_)=>{
-                        setCurrentStock(loadedStock)
-                        setCurrentStockPricesLoaded(true)
-
-                        setCurrentStockIsInitialised(true)
-                        resolve()
-
-                    })
-                    .catch((_)=>{
-
-                        console.log(_)
-
-                        reject(
-                            {
-                                message:"error loading one or more items pricing Info",
-                                errors:errors
-                            }
-                        )
-                    })
-
-                } catch(err){
-                    throw Error({
-                        message:"error loading user's currentStock",
-                        err:err
-                    })
-                }
-            }
-        )
     }
 
 
@@ -400,7 +101,6 @@ export const StockProvider = ({children}) => {
             setCurrentStock,
             currentStockIsInitialised,
             currentStock_init,
-            currentStock_addItems,
             setCurrentStockIsInitialised
         }}>
 
