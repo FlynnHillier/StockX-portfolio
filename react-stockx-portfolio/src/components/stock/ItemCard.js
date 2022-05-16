@@ -52,15 +52,15 @@ const ItemCard = ({
                         <tbody>
                             <tr>
                                 <th>Ask value</th>
-                                <th>{AskValue}</th>
+                                <th>£{AskValue}</th>
                             </tr>
                             <tr >
                                 <th>Bid value </th>
-                                <th>{BidValue}</th>
+                                <th>£{BidValue}</th>
                             </tr>
                             <tr>
                                 <th> Sale value</th>
-                                <th>{SaleValue}</th>
+                                <th>£{SaleValue}</th>
                             </tr>
                         </tbody>
 
