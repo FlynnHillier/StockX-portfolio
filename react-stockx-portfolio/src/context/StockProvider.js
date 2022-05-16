@@ -11,23 +11,22 @@ export const StockProvider = ({children}) => {
 
     let [currentStock,setCurrentStock] = useState([])
     let [currentStockIsInitialised,setCurrentStockIsInitialised] = useState(false)
+    let [itemsForInit,setItemsForInit] = useState([])
 
 
+    async function loadItemPricing(sizes,urlKey){
+        const pricing = await axios_default.post(
+            "api/private/stockx/pricing",
+            {
+                urlKey:urlKey,
+                sizes:sizes
+            }
+        )
+        return pricing.data.data
+    }
 
 
-
-    const currentStock_init = async () =>{
-
-        async function loadItemPricing(sizes,urlKey){
-            const pricing = await axios_default.post(
-                "api/private/stockx/pricing",
-                {
-                    urlKey:urlKey,
-                    sizes:sizes
-                }
-            )
-            return pricing.data.data
-        }
+    const currentStock_init = async (itemForInit=[]) =>{
 
         function applyPricingData(itemForPriceLoad){
             return new Promise(async (resolve,reject)=>{
@@ -79,12 +78,41 @@ export const StockProvider = ({children}) => {
 
 
             let pendingPromises = []
-            for(let itemForPriceLoad of retrievedStock){
-                pendingPromises.push(applyPricingData(itemForPriceLoad))
+
+            if(itemsForInit.length === 0){
+                for(let item of retrievedStock){
+                    pendingPromises.push(applyPricingData(item))
+                }
+            } else{
+                for(let item of retrievedStock){
+                    if(itemsForInit.includes(item.urlKey)){
+                        pendingPromises.push(applyPricingData(item))
+                    }
+                }
+                setItemsForInit([])
             }
 
+
+
             await Promise.all(pendingPromises)
-            setCurrentStock(retrievedStock)
+            setCurrentStock((prevState)=>{
+                if(itemsForInit.length === 0){ //if non item particular init
+                    return retrievedStock
+                }
+                let detached_prevState = JSON.parse(JSON.stringify(prevState)) //if item particular init
+                for(let urlKey of itemsForInit){
+                    const updatedItemData = retrievedStock.find((item)=>item.urlKey === urlKey)
+                    let targetItem = detached_prevState.find((item)=>item.urlKey === urlKey)
+                    if(targetItem !== undefined){
+                        targetItem = retrievedStock.find((item)=>item.urlKey === urlKey)
+                    }
+                    
+                    if(targetItem === undefined){
+                        detached_prevState.push(updatedItemData)
+                    }
+                }
+                return detached_prevState
+            })
             setCurrentStockIsInitialised(true)
             return 
         } catch(err){
@@ -101,7 +129,9 @@ export const StockProvider = ({children}) => {
             setCurrentStock,
             currentStockIsInitialised,
             currentStock_init,
-            setCurrentStockIsInitialised
+            setCurrentStockIsInitialised,
+            itemsForInit,
+            setItemsForInit
         }}>
 
         {children}

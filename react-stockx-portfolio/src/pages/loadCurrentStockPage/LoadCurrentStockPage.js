@@ -7,10 +7,14 @@ import { Spinner,Container,Row,Col } from 'react-bootstrap'
 
 const LoadCurrentStockPage = () => {
 
-    let {currentStock_init} = useContext(StockContext)
+    let {currentStock_init,itemsForInit} = useContext(StockContext)
 
     useEffect(()=>{
-        currentStock_init()
+        if(itemsForInit.length !== 0){
+          currentStock_init(itemsForInit)
+        } else{
+          currentStock_init()
+        }
     },[])
 
   return (
