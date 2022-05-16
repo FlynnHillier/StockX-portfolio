@@ -221,7 +221,7 @@ function get_product_specific_sizing(sizes=[],urlKey){
 
             for(let size of sizes){
 
-                let size_info = data.variants.find((variant) => variant.traits.size == size)
+                let size_info = data.variants.find((variant) => variant.traits.size == size || variant.traits.size == size + "Y" )
                 
                 if(size_info === undefined){
                     response.sizesInfo.push({
