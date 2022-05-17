@@ -16,7 +16,7 @@ const AmmendItem = ({}) => {
     const navigate = useNavigate()
     const location = useLocation()
     const {itemID} = useParams()
-    const {currentStock,setCurrentStockIsInitialised} = useContext(StockContext)
+    const {currentStock,setCurrentStockIsInitialised,setItemsForInit} = useContext(StockContext)
 
     function pageInit(){
         function getItemData(){
@@ -38,8 +38,6 @@ const AmmendItem = ({}) => {
         if(retrievedItemData === null){
             navigate("/stock/current")
         }
-
-        console.log(retrievedItemData)
 
         setCurrentItemData(retrievedItemData)
         setPageIsLoading(false)
@@ -65,6 +63,7 @@ const AmmendItem = ({}) => {
                 <>-x-</> 
                 :
                 <AmmendItemPage
+                    setItemsForInit = {setItemsForInit}
                     itemData = {currentItemData}
                     setCurrentStockIsInitialised={setCurrentStockIsInitialised}
                 />                 

@@ -439,7 +439,7 @@ const SizingSelector = ({sizingData,selectedSize,setSelectedSize}) => {
 
 
 
-const AmmendItemPage = ({itemData,setCurrentStockIsInitialised}) => {
+const AmmendItemPage = ({itemData,setCurrentStockIsInitialised,setItemsForInit}) => {
     let [selectedSize,setSelectedSize] = useState(null)
     let [changes,setChanges] = useState([])
     let [sizes,setSizes] = useState(itemData.sizes)
@@ -593,6 +593,7 @@ const AmmendItemPage = ({itemData,setCurrentStockIsInitialised}) => {
    async function onSaveChanges(){
     try {
       const serverResponse = await commitChangesToServer()
+      setItemsForInit([itemData.urlKey])
       setCurrentStockIsInitialised(false)
     } catch(err){
       console.error(err)
