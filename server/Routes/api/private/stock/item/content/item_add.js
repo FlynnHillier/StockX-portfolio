@@ -129,32 +129,20 @@ function build_api_private_stock_item_add(mongoose_instance,config){
 
 
     function add_item(authKey,urlKey,size_qty_arr,title,imageURL,colour){
-        return new Promise((resolve,reject)=>{
-
-           add_new_item_to_user(authKey,urlKey,title,imageURL,colour)
-           .then((result)=>{
-
+        return new Promise(async (resolve,reject)=>{
+           try {
+                const addNewItemResult = await add_new_item_to_user(authKey,urlKey,title,imageURL,colour)
                 for(let size_info_obj of size_qty_arr){
-                    add_new_size_to_item(authKey,urlKey,size_info_obj.size)
-                    .then((result)=>{
-                        if(size_info_obj.qty !== 0){
-                            inc_item_size_qty(authKey,urlKey,size_info_obj.size,size_info_obj.qty)
-                            .catch((error)=>{
-                                reject(error)
-                            })
-                        }
-
-                    })
-                    .catch((error)=>{
-                        reject(error)
-                    })
+                    const addSizeResult = await add_new_size_to_item(authKey,urlKey,size_info_obj.size)
+                    if(size_info_obj.qty !== 0){
+                        await inc_item_size_qty(authKey,urlKey,size_info_obj.size,size_info_obj.qty)
+                    }
                 }
-                resolve()
-           })
-           .catch((error)=>{
-               reject(error)
-           })
 
+                resolve()
+           } catch(err){
+               reject(err)
+           }
         })
     }
 
@@ -280,6 +268,7 @@ function build_api_private_stock_item_add(mongoose_instance,config){
             
             Promise.all(promises)
             .then((_)=>{
+                console.log(promises)
                 res.status(200).send({
                     result:true,
                     message:"Successfully added item(s) to user's stock"
