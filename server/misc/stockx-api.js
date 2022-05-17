@@ -69,7 +69,6 @@ function proxyRotate(){
     }
 
     proxies.lastUsed = targetIndex
-    console.log(proxyForUse)
 }
 
 
@@ -123,7 +122,7 @@ function search_item(search_term,max_results=4){
                     type:product.shoe,
                     colorway:product.traits.find((trait)=> trait.name === "Colorway" || trait.name === "Color").value,
                     urlKey:product.urlKey,
-                    releaseDate:product.traits.find((trait)=>trait.name === "Release Date").value,
+                    releaseDate:(product.traits.find((trait)=>trait.name === "Release Date") || {}).value,
                     media:product.media
                 })
             }
@@ -144,10 +143,10 @@ function search_item(search_term,max_results=4){
 
 
 
-function get_product_info(product_urlKey){
+async function get_product_info(product_urlKey){
     proxyRotate()
-    return new Promise((resolves,rejects)=>{
-        axios({
+    try {
+        const stockxResponse = await axios({
             url:"/p/e",
             method:"post",
             data:{
@@ -165,29 +164,30 @@ function get_product_info(product_urlKey){
                     "apollographql-client-version": "2022.02.27.01",
             }
         })
-        .then((result)=>{
-            if(result.status !== 200){
-                rejects({
-                    reason:"status code incorrect"
-                })
-            }
+        return stockxResponse.data.data
 
-            resolves(result.data.data.product)
-        })
-        .catch((error)=>{
-            rejects({
-                error:error,
-                reason:"axios failure"
-            })
-        })
-    })
+    } catch(err){
+
+        console.log(err.response.status)
+        let errorForThrow
+        if(err.response.status === 403){
+            errorForThrow = {
+                isAccessDenied:true,
+            } 
+        } else {
+            errorForThrow = {
+                isAccessDenied:false,
+                error:err
+            }
+        }
+        throw errorForThrow
+    }
 }
 
 
-function get_product_specific_sizing(sizes=[],urlKey){
+async function get_product_specific_sizing(sizes=[],urlKey){
     proxyRotate()
-    return new Promise((resolves,rejects)=>{
-        
+    try {
         for(let size of sizes){
             if(Number.isNaN(size)){
                 throw 'size must be an valid number'
@@ -197,58 +197,69 @@ function get_product_specific_sizing(sizes=[],urlKey){
                 }
             }
         }
-        
-        
-        get_product_info(urlKey)
-        .then((data)=>{
+        const responseData = await get_product_info(urlKey)
+        const data = responseData.product
 
-            if(data === null || data === undefined){
-               resolves({
+        if(data === null || data === undefined){
+            return {
                 productFound:false,
-               })
             }
+        }
+        
+        let response = {
+            productFound:true,
+            imageURL:data.media.imageUrl,
+            listingType:data.listingType,
+            productCategory: data.productCategory,
+            brand: data.brand,
+            model: data.model,
+            title: data.title,
+            sizesInfo:[]
+        }
+
+        for(let size of sizes){
+
+            let size_info = data.variants.find((variant) => variant.traits.size == size || variant.traits.size == size + "Y" )
             
-            let response = {
-                productFound:true,
-                imageURL:data.media.imageUrl,
-                listingType:data.listingType,
-                productCategory: data.productCategory,
-                brand: data.brand,
-                model: data.model,
-                title: data.title,
-                sizesInfo:[]
+            if(size_info === undefined){
+                response.sizesInfo.push({
+                    size:size,
+                    exists:false
+                })
             }
-
-            for(let size of sizes){
-
-                let size_info = data.variants.find((variant) => variant.traits.size == size || variant.traits.size == size + "Y" )
-                
-                if(size_info === undefined){
-                    response.sizesInfo.push({
-                        size:size,
-                        exists:false
-                    })
-                }
-                else{
-                    response.sizesInfo.push({
-                        size:size,
-                        exists:true,
-                        id:size_info.id,
-                        lowestAsk:size_info.market.bidAskData.lowestAsk,
-                        highestBid:size_info.market.bidAskData.highestBid,
-                        lastSale:size_info.market.salesInformation.lastSale,
-                        lastSale_changePercentage:size_info.market.salesInformation.changePercentage,
-                        lastSale_changeValue:size_info.market.salesInformation.changeValue,
-                        salesVolatility:size_info.market.salesInformation.volatility
-                    })
-                }
+            else{
+                response.sizesInfo.push({
+                    size:size,
+                    exists:true,
+                    id:size_info.id,
+                    lowestAsk:size_info.market.bidAskData.lowestAsk,
+                    highestBid:size_info.market.bidAskData.highestBid,
+                    lastSale:size_info.market.salesInformation.lastSale,
+                    lastSale_changePercentage:size_info.market.salesInformation.changePercentage,
+                    lastSale_changeValue:size_info.market.salesInformation.changeValue,
+                    salesVolatility:size_info.market.salesInformation.volatility
+                })
             }
-            resolves(response)
-        })
-        .catch((error)=>{
-            rejects((error))
-        })
-    })
+        }
+        
+        return {
+            result:true,
+            data:response
+        }
+    } catch(err){
+        if(err.isAccessDenied === true){
+            return{
+                result:false,
+                accessDenied:true
+            }
+        } else{
+            return{
+                result:false,
+                accessDenied:false
+            }
+        }
+
+    }
 }
 
 

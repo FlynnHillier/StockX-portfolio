@@ -7,7 +7,7 @@ import { Spinner,Container,Row,Col } from 'react-bootstrap'
 
 const LoadCurrentStockPage = () => {
 
-    let {currentStock_init} = useContext(StockContext)
+    let {currentStock_init,errorMessage} = useContext(StockContext)
 
     useEffect(()=>{
         currentStock_init()
@@ -39,6 +39,8 @@ const LoadCurrentStockPage = () => {
               className="text-center"
             >
               Loading your items....
+              <br/>
+              <span className="text-danger">{errorMessage}</span>
             </Col>
             <Col>
             </Col>

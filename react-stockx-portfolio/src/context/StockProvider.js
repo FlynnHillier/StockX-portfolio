@@ -9,49 +9,83 @@ const StockContext = createContext({})
 
 export const StockProvider = ({children}) => {
 
+
+    const maxRetrys = 5
+
     let [currentStock,setCurrentStock] = useState([])
     let [currentStockIsInitialised,setCurrentStockIsInitialised] = useState(false)
-
-
-
-
+    let [errorMessage,setErrorMessage] = useState("")
 
     const currentStock_init = async () =>{
 
-        async function loadItemPricing(sizes,urlKey){
-            const pricing = await axios_default.post(
-                "api/private/stockx/pricing",
-                {
-                    urlKey:urlKey,
-                    sizes:sizes
+        async function loadItemPricing(sizes,urlKey){     
+            try {
+                const pricingServerResponse = await axios_default.post(
+                    "api/private/stockx/pricing",
+                    {
+                        urlKey:urlKey,
+                        sizes:sizes
+                    }
+                )
+                
+                if(pricingServerResponse.data.result === false){
+                    throw {
+                        isAccessDeniedError:pricingServerResponse.data.isAccessDenied
+                    }
                 }
-            )
-            return pricing.data.data
+
+                return pricingServerResponse.data.data
+            } catch(err){
+                throw(err)
+            }
         }
 
-        function applyPricingData(itemForPriceLoad){
+        function applyPricingData(itemForPriceLoad,retryNum=0){
             return new Promise(async (resolve,reject)=>{
-                const urlKey = itemForPriceLoad.urlKey
+                try {
+                    const urlKey = itemForPriceLoad.urlKey
 
-                let sizesForLoad = []
-                for(let sizeObj of itemForPriceLoad.sizes){
-                    sizesForLoad.push(sizeObj.size)
+                    let sizesForLoad = []
+                    for(let sizeObj of itemForPriceLoad.sizes){
+                        sizesForLoad.push(sizeObj.size)
+                    }
+
+                    const pricingData = await loadItemPricing(sizesForLoad,urlKey)
+
+                    itemForPriceLoad.isLoaded = true
+
+                    if(pricingData.productFound === false){
+                        return resolve(itemForPriceLoad)
+                    }
+
+                    for(let info of pricingData.sizesInfo){
+                        let targetSizeObj = itemForPriceLoad.sizes.find((sizeObj)=>sizeObj.size === info.size)
+                        targetSizeObj.lowestAsk = info.lowestAsk
+                        targetSizeObj.highestBid = info.highestBid
+                        targetSizeObj.lastSale = info.lastSale
+                    }
+                    resolve(itemForPriceLoad)
+                } catch (err){
+                    if(err.isAccessDeniedError){
+                        itemForPriceLoad.isLoaded = false
+                        
+                        if(!(retryNum > maxRetrys)){
+                            applyPricingData(itemForPriceLoad,retryNum + 1)
+                            .then((updatedItem)=>{
+                                resolve(updatedItem)
+                            })
+                            .catch((err)=>{
+                                reject (err)
+                            })
+                        } else{
+                            return reject({
+                                message:`after ${maxRetrys} attempt(s) to retrieve pricing info for item: '${itemForPriceLoad.urlKey}', prices were stil not retrieved. Stopping.`
+                            })
+                        }
+                    } else{
+                        reject(err)
+                    }
                 }
-
-                const pricingData = await loadItemPricing(sizesForLoad,urlKey)
-
-
-                if(pricingData.productFound === false){
-                    return resolve(itemForPriceLoad)
-                }
-
-                for(let info of pricingData.sizesInfo){
-                    let targetSizeObj = itemForPriceLoad.sizes.find((sizeObj)=>sizeObj.size === info.size)
-                    targetSizeObj.lowestAsk = info.lowestAsk
-                    targetSizeObj.highestBid = info.highestBid
-                    targetSizeObj.lastSale = info.lastSale
-                }
-                resolve(itemForPriceLoad)
             })
         }
 
@@ -88,6 +122,7 @@ export const StockProvider = ({children}) => {
             setCurrentStockIsInitialised(true)
             return 
         } catch(err){
+            setErrorMessage(`a critical error has occured while attempting to load your stock: Please refresh. Error details: ${err.message ? err.message : "non provided."}`)
             throw(err)
         }
     }
@@ -101,7 +136,8 @@ export const StockProvider = ({children}) => {
             setCurrentStock,
             currentStockIsInitialised,
             currentStock_init,
-            setCurrentStockIsInitialised
+            setCurrentStockIsInitialised,
+            errorMessage
         }}>
 
         {children}
