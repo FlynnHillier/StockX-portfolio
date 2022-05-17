@@ -19,6 +19,7 @@ export const StockProvider = ({children}) => {
 
     async function loadItemPricing(sizes,urlKey){     
         try {
+
             const pricingServerResponse = await axios_default.post(
                 "api/private/stockx/pricing",
                 {
@@ -40,7 +41,7 @@ export const StockProvider = ({children}) => {
     }
 
 
-    const currentStock_init = async (itemForInit=[]) =>{
+    const currentStock_init = async (itemsForInit=[]) =>{
 
         function applyPricingData(itemForPriceLoad,retryNum=0){
             return new Promise(async (resolve,reject)=>{
@@ -53,9 +54,7 @@ export const StockProvider = ({children}) => {
                     }
 
                     const pricingData = await loadItemPricing(sizesForLoad,urlKey)
-
                     itemForPriceLoad.isLoaded = true
-
                     if(pricingData.productFound === false){
                         return resolve(itemForPriceLoad)
                     }
@@ -66,6 +65,7 @@ export const StockProvider = ({children}) => {
                         targetSizeObj.highestBid = info.highestBid
                         targetSizeObj.lastSale = info.lastSale
                     }
+
                     resolve(itemForPriceLoad)
                 } catch (err){
                     if(err.isAccessDeniedError){
@@ -138,10 +138,13 @@ export const StockProvider = ({children}) => {
                 }
                 let detached_prevState = JSON.parse(JSON.stringify(prevState)) //if item particular init
                 for(let urlKey of itemsForInit){
-                    const updatedItemData = retrievedStock.find((item)=>item.urlKey === urlKey)
+
+                    let updatedItemData = retrievedStock.find((item)=>item.urlKey === urlKey)
                     let targetItem = detached_prevState.find((item)=>item.urlKey === urlKey)
                     if(targetItem !== undefined){
-                        targetItem = retrievedStock.find((item)=>item.urlKey === urlKey)
+                        targetItem.sizes = updatedItemData.sizes
+                        // detached_prevState.splice(detached_prevState.indexOf(targetItem),1)
+                        // detached_prevState.push(updatedItemData)
                     }
                     
                     if(targetItem === undefined){
