@@ -5,9 +5,9 @@ import ReactRouterPrompt from "react-router-prompt"
 
 import axios_default from '../../api/axios'
 
-import { Row,Col, ButtonGroup,Button,Container,Card,ListGroup,Badge,Modal } from 'react-bootstrap'
+import { Row,Col, ButtonGroup,Button,Container,Card,ListGroup,Badge,Modal,Spinner } from 'react-bootstrap'
 import ItemPageStandard from '../../components/stock/ItemPageStandard'
-
+import "./style.css"
 
 
 const OnPageLeave = ({isChanges}) => {
@@ -437,6 +437,33 @@ const SizingSelector = ({sizingData,selectedSize,setSelectedSize}) => {
 
 
 
+  const ModalLoading = ({show,text}) => {
+    return (
+        <Modal
+            show={show}
+        >
+            <Container fluid className="py-3">
+                <Row className="gy-3">
+                    <Col xs={12} className="d-flex justify-content-center">
+                        <Spinner animation='border'></Spinner>
+                    </Col>
+                    <Col xs={12} className="text-center">
+                        <span className="text-muted"> {text}</span>
+                    </Col>
+                </Row>
+            </Container>
+        </Modal>
+    )
+}
+
+
+const ErrorDisplay = ({errorMessage}) => {
+  return errorMessage === undefined || errorMessage === "" ? <></> :
+  <Container className={"text-center errorMessageBox2 p-2 my-3"}>
+      {`ERROR: ${errorMessage}`}
+  </Container> 
+}
+
 
 
 const AmmendItemPage = ({itemData,setCurrentStockIsInitialised,setItemsForInit}) => {
@@ -444,7 +471,7 @@ const AmmendItemPage = ({itemData,setCurrentStockIsInitialised,setItemsForInit})
     let [changes,setChanges] = useState([])
     let [sizes,setSizes] = useState(itemData.sizes)
     let [errorMessage,setErrorMessage] = useState("")
-    let [pageIsActive,setPageIsActive] = useState(true)
+    let [isSaving,setIsSaving] = useState(false)
 
     function stageQtyChange(size,qty){
         setChanges((prevState)=>{
@@ -591,6 +618,8 @@ const AmmendItemPage = ({itemData,setCurrentStockIsInitialised,setItemsForInit})
 
 
    async function onSaveChanges(){
+    setErrorMessage("")
+    setIsSaving(true)
     try {
       const serverResponse = await commitChangesToServer()
       setItemsForInit([itemData.urlKey])
@@ -598,6 +627,8 @@ const AmmendItemPage = ({itemData,setCurrentStockIsInitialised,setItemsForInit})
     } catch(err){
       console.error(err)
       setErrorMessage("an error occured while attempting to save your changes.")
+    } finally{
+      setIsSaving(false)
     }
    }
 
@@ -607,6 +638,7 @@ const AmmendItemPage = ({itemData,setCurrentStockIsInitialised,setItemsForInit})
 
     return (
         <>
+            <ModalLoading show={isSaving} text={"saving.."}/>
             <OnPageLeave
                 isChanges={changes.length !== 0}
             />
@@ -636,8 +668,10 @@ const AmmendItemPage = ({itemData,setCurrentStockIsInitialised,setItemsForInit})
                     )
                 }}
             >
+              
                 <Row>
                     <Col xs={8}>
+                        <ErrorDisplay errorMessage={errorMessage}/>
                         <Stage
                             selectedSize={selectedSize}
                             itemData={itemData}
