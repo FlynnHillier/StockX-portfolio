@@ -142,10 +142,8 @@ export const StockProvider = ({children}) => {
                     let updatedItemData = retrievedStock.find((item)=>item.urlKey === urlKey)
                     let targetItem = detached_prevState.find((item)=>item.urlKey === urlKey)
                     if(targetItem !== undefined){
-                        targetItem.sizes = updatedItemData.sizes
-                        targetItem.qty = updatedItemData.qty
-                        // detached_prevState.splice(detached_prevState.indexOf(targetItem),1)
-                        // detached_prevState.push(updatedItemData)
+
+                        targetItem = Object.assign(targetItem,updatedItemData)
                     }
                     
                     if(targetItem === undefined){
