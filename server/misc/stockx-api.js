@@ -277,19 +277,25 @@ function get_product_metaInfo(product_urlKey){
             }
         })
         .then((result)=>{
-            if(result.status !== 200){
-                rejects({
-                    reason:"status code incorrect"
-                })
-            }
-
             resolves(result.data.data.product)
         })
         .catch((error)=>{
-            rejects({
-                error:error,
-                reason:"axios failure"
-            })
+            if(error.response.status !== 200){
+                if(error.response.status === 403){
+                    return rejects({
+                        isAccessDenied:true
+                    })
+                }
+                rejects({
+                    isAccessDenied:false
+                })
+            }
+            else{
+                next({
+                    expected:false,
+                    error:error
+                })
+            }
         })
     })
 }

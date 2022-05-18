@@ -37,10 +37,17 @@ function build_private_api_stockx_metea_router(mongoose_instance,config){
             config.stockx_api.get_product_metaInfo(req.body.urlKey)
             .then((response)=>{
                 res.status(200).send({
+                    result:true,
                     data:response
                 })
             })
             .catch((error)=>{
+                if(error.isAccessDenied === true){
+                    return res.status(200).send({
+                        result:false,
+                        isAccessDenied:true
+                    })
+                }
                 next({
                     expected:false,
                     error:error

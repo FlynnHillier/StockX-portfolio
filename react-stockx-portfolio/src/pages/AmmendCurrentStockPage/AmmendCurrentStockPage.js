@@ -157,7 +157,7 @@ const AmmendCurrentStockPage = props => {
         return objForReturn
     }
 
-    function retrieveItemMetaInfo(urlKey){
+    function retrieveItemMetaInfo(urlKey,maxAttempts=5,attempt=2){
         return new Promise(async (resolve,reject)=>{
             try {
                 const serverResponse = await axios_default.post(
@@ -177,6 +177,13 @@ const AmmendCurrentStockPage = props => {
                     return
                 }
 
+                if(serverResponse.data.isAccessDenied === true){
+                    if(!(attempt > maxAttempts)){
+                        return resolve(retrieveItemMetaInfo(urlKey,maxAttempts,attempt + 1))
+                    } else{
+                       return reject(`failed after ${maxAttempts} attempt(s) to retrieve meta info for '${urlKey}'.`)
+                    }
+                }
 
                 const metaInfo = serverResponse.data.data
                 
@@ -200,7 +207,7 @@ const AmmendCurrentStockPage = props => {
 
                 resolve(metaInfo) 
             }  catch(err){
-                console.log("error caught!")
+                throw err
             }
         })
         
@@ -215,8 +222,7 @@ const AmmendCurrentStockPage = props => {
             setSelectedItemData(data)
         } catch(err){
             setItemIsSelected(false)
-            console.error(err)
-            setErrorMessage(err.msg ? err.msg : "an unexpected error occured while retrieving item Meta info.")
+            setErrorMessage(err)
         } finally{
             setIsLoadingItemData(false)
         }
@@ -225,7 +231,6 @@ const AmmendCurrentStockPage = props => {
 
 
     async function onSearch(searchQuery){
-
         function sendSearchQuery(query){
             return new Promise(async (resolve,reject)=>{
                try{
