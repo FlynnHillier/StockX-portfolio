@@ -13,7 +13,6 @@ import LandingPage from "./pages/landingPage/LandingPage"
 import CurrentStockPage from "./pages/currentStock/CurrentStockPage"
 import CurrentStockViewItemPage from "./pages/itemView/CurrentStockViewItemPage"
 import Logout from "./pages/logout/logout"
-import AmmendItemPage from "./pages/ammendItemPage/AmmendItemPage"
 import AmmendCurrentStockPage from "./pages/AmmendCurrentStockPage/AmmendCurrentStockPage"
 
 import AmmendItem from "./pages/AmmendItemPageV2/AmmendItem"
