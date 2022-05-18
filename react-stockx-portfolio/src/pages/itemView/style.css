@@ -1,0 +1,15 @@
+.SizingSelector.Size {
+    border:1px solid rgb(181, 179, 179);
+}
+
+.SizingSelector.Size:hover {
+    background-color: lightgray;
+    cursor: pointer;
+    color:rgb(140,140,128)
+}
+
+.SizingSelector.Size.active {
+    color:black;
+    background-color: rgb(199, 198, 198);
+    border:1px solid black
+}

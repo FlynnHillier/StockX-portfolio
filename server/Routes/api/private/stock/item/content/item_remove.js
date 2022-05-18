@@ -1,100 +1,116 @@
 const path = require("path")
 const express = require("express")
 const { checkSchema , validationResult } = require("express-validator")
+const { url } = require("inspector")
+const { off } = require("process")
 
 function build_api_private_stock_item_remove(mongoose_instance,config){
     const api_private_stock_item_remove = express.Router()
 
 
-    function decrease_user_stock_item_size_qty(authKey,urlKey,size,qty_decrease){
-        return new Promise((resolve,reject)=>{
-            config.mongo.mongoose_models.user.findOneAndUpdate(
-                {
-                    "authKey":authKey,
-                    "stock.current":{
-                        "$elemMatch":{
-                            urlKey:urlKey
-                        }
-                    },
-                    "stock.current.sizes":{
-                        "$elemMatch":{
-                            size:size
-                        }
-                    }
-                },
-                {
-                    "$inc":{
-                        "stock.current.$[item].sizes.$[size].qty":-qty_decrease
-                    }
-                },
-                {
-                    arrayFilters:[
-                        {
-                            "item.urlKey":urlKey
+    async function decrease_user_stock_item_size_qty(authKey,urlKey,size,qty_decrease){
+            
+            try {
+                const result = await config.mongo.mongoose_models.user.findOneAndUpdate(
+                    {
+                        "authKey":authKey,
+                        "stock.current":{
+                            "$elemMatch":{
+                                urlKey:urlKey
+                            }
                         },
-                        {
-                            "size.size":size
-                        }
-                    ],
-                    new:true,
-                    projection:{
-                        "stock.current":1
-                    }
-                }
-            )
-            .then((result)=>{
-                resolve(result)
-            })
-            .catch((error)=>{
-                reject(error)
-            })
-        })
-    }
-
-
-
-    function remove_user_stock_item_sizeObj(authKey,urlKey,size){
-        return new Promise((resolve,reject)=>{
-            config.mongo.mongoose_models.user.findOneAndUpdate(
-                {
-                    "authKey":authKey,
-                    "stock.current":{
-                        "$elemMatch":{
-                            urlKey:urlKey
+                        "stock.current.sizes":{
+                            "$elemMatch":{
+                                size:size
+                            }
                         }
                     },
-                    "stock.current.sizes":{
-                        "$elemMatch":{
-                            size:size
+                    {
+                        "$inc":{
+                            "stock.current.$[item].sizes.$[size].qty":(-1 * qty_decrease)
                         }
-                    }
-                },
-                {
-                    "$pull":{
-                        "stock.current.$.sizes":{
-                            size:size
-                        }
-                    }
-                },
-                {
-                    projection:{
-                        "stock.current":1
                     },
-                    new:true,
-                }
-            )
-            .then((result)=>{
-                resolve(result)
-            })
-            .catch((error)=>{
-                reject(error)
-            })
-        })
-    }
+                    {
+                        arrayFilters:[
+                            {
+                                "item.urlKey":urlKey
+                            },
+                            {
+                                "size.size":size
+                            }
+                        ],
+                        new:true,
+                        projection:{
+                            "stock.current":true
+                        }
+                    }
+                )
 
-    function remove_user_stock_item(authKey,urlKey){
-        return new Promise((resolve,reject)=>{
-            config.mongo.mongoose_models.user.updateOne(
+                if(result === null){
+                    throw Error({
+                        isDidNotExist:true,
+                        message:`${urlKey} : ${size} , did not exist for qty decrease.`
+                    })
+                }
+
+                return result.stock.current
+
+            } catch(err){
+                throw err
+            }
+                
+        }
+
+
+
+    async function remove_user_stock_item_sizeObj(authKey,urlKey,size){
+            try {
+                const result = await config.mongo.mongoose_models.user.findOneAndUpdate(
+                    {
+                        "authKey":authKey,
+                        "stock.current":{
+                            "$elemMatch":{
+                                urlKey:urlKey
+                            }
+                        },
+                        "stock.current.sizes":{
+                            "$elemMatch":{
+                                size:size
+                            }
+                        }
+                    },
+                    {
+                        "$pull":{
+                            "stock.current.$.sizes":{
+                                size:size
+                            }
+                        }
+                    },
+                    {
+                        projection:{
+                            "stock.current":1
+                        },
+                        new:true,
+                    }
+                )
+
+                if(result === null){
+                    throw Error({
+                        isDidNotExist:true,
+                        message:`${urlKey} : ${size} , did not exist for sizeObj removal.`
+                    })
+                } else{
+                    return result.stock.current
+                }
+
+            } catch(err){
+                throw err
+            }
+        }
+
+    async function remove_user_stock_item(authKey,urlKey){
+        try {
+            const result = await config.mongo.mongoose_models.user.updateOne(
                 {
                     "authKey":authKey,
                     "stock.current":{
@@ -111,71 +127,57 @@ function build_api_private_stock_item_remove(mongoose_instance,config){
                     }
                 }
             )
-            .then((result)=>{
-                resolve(result)
-            })
-            .catch((error)=>{
-                reject(error)
-            })
-        })
+
+            if(result === null){
+                throw Error({
+                    isDidNotExist:true,
+                    message:`${urlKey} , item did not exist for item removal.`
+                })
+            }
+
+            return result
+        } catch(err){
+            throw err
+        }
+            
     }
 
 
 
 
 
-    function decrease_item_qty(authKey,urlKey,size_qty_arr){
-        return new Promise((resolve,reject)=>{
+    async function decrease_item_qty(authKey,urlKey,size_qty_arr){
 
-            for(let size_obj of size_qty_arr){
+            let didNotExist = []
 
-                decrease_user_stock_item_size_qty(authKey,urlKey,size_obj.size,size_obj.qty)
-                .then((result)=>{
+            for(let sizeObj of size_qty_arr){
+                try {
+                    const {size,qty} = sizeObj
+                    //decrease qty
+                    const decQtyResult = await decrease_user_stock_item_size_qty(authKey,urlKey,size,qty)
+                    const decQtyResult_targetItem = decQtyResult.find((item)=>item.urlKey === urlKey)
+                    const decQtyResult_targetSizeObj = decQtyResult_targetItem.sizes.find((sizeObj)=>sizeObj.size === size)
 
+                    //pull sizeObj
+                    if(decQtyResult_targetSizeObj.qty <= 0){
+                        const remSizeObjResult = await remove_user_stock_item_sizeObj(authKey,urlKey,size)
+                        const remSizeObjResult_targetItem = remSizeObjResult.find((item)=>item.urlKey === urlKey)
 
-
-                    if(result.stock.current.find((item)=> item.urlKey === urlKey).sizes.find((mongo_side_size_obj)=>mongo_side_size_obj.size === size_obj.size).qty <= 0){
-                        remove_user_stock_item_sizeObj(authKey,urlKey,size_obj.size)
-                        .then((result)=>{
-
-                            if(result.stock.current.find((item)=> item.urlKey === urlKey).sizes.length === 0){
-                                remove_user_stock_item(authKey,urlKey)
-                                .then((result)=>{
-                                    resolve() //shouldn't really happen unless last itteration of for loop ( if it does means non existant sizes were passed)
-                                })
-                                .catch((error)=>{
-                                    reject({
-                                        expected:false,
-                                        message:"mongo error removing an item from users stock",
-                                        error:error
-                                    })
-                                })
-                            }
-
-                        })
-                        .catch((error)=>{
-                            reject({
-                                expected:false,
-                                message:"mongo error removing an item's sizeObj from users stock",
-                                error:error
-                            })
-                        })
+                        //pull item
+                        if(remSizeObjResult_targetItem.sizes.length === 0){
+                            const remItemResult = await remove_user_stock_item(authKey,urlKey)
+                        }
                     }
-                })
-                .catch((error)=>{
-                    reject({
-                        exected:false,
-                        message:"mongo error decreasing qty of user's item size",
-                        error:error
-                    })
-                })
-
+                } catch(err){
+                    if(err.isDidNotExist === true){
+                        didNotExist.push(err)
+                    } else{
+                        throw err
+                    }
+                }
 
             }
-
-            resolve()
-
-        })
+            return didNotExist
     }
     
 
@@ -238,7 +240,7 @@ function build_api_private_stock_item_remove(mongoose_instance,config){
         
             },
         }),
-        (req,res,next)=>{
+        async (req,res,next)=>{
             const req_errors = validationResult(req).errors
             
             if(req_errors.length !== 0){
@@ -249,34 +251,35 @@ function build_api_private_stock_item_remove(mongoose_instance,config){
             }
 
 
-            
-            let promises = []
-            for (let update of req.body.updates){                
-                promises.push(decrease_item_qty(req.session.authKey,update.urlKey,update.sizes))
 
+            const authKey = req.session.authKey
+
+
+            let nonExistantFromUpdate = []
+
+            for (let update of req.body.updates){
+                const urlKey = update.urlKey
+                const sizesObjArr = update.sizes                
+                try {
+                    const nonExistant = await decrease_item_qty(authKey,urlKey,sizesObjArr)
+                    if(nonExistant !== []){
+                        nonExistantFromUpdate.push(nonExistant)
+                    }
+
+                } catch(err){
+                    return next({
+                        expected:false,
+                        message:"mongo error removing from user's stock",
+                        item:urlKey,
+                        error:err
+                    })
+                }
             }
-            
-            Promise.all(promises)
-            .then((_)=>{
-                res.status(200).send({
-                    result:true,
-                    message:"Successfully removed item(s) from user's stock"
-                })
+            res.status(200).send({
+                result:true,
+                message:"successfully removed item(s) from stock",
+                didNotExist:nonExistantFromUpdate
             })
-            .catch((error)=>{
-                next({
-                    expected:false,
-                    message:"mongo error removing from user's stock",
-                    error:error
-                })
-            })
-
-            
-
-
-
-
-
         }    
     )
     

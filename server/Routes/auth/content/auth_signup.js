@@ -12,6 +12,7 @@ function build_auth_signup_router(mongoose_instance,config){
                 email:email,
                 password:bcrypt.hashSync(password_plainText,config.mongo.user_creation.salt_rounds),
                 authKey:authKey,
+                settings:{},
                 stock:{}
             })
             .then((result)=>{

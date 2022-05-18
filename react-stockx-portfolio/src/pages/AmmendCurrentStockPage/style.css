@@ -1,0 +1,11 @@
+.AmmendCurrenStock.form-control:focus {
+    box-shadow: none;
+}
+
+.searchResult.searchResult_item:hover {
+    cursor: pointer;
+}
+
+.errorMessageBox {
+    background-color: rgba(240, 72, 72, 0.889);
+}

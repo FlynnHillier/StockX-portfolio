@@ -32,7 +32,7 @@ function listen(app,PORT = 5000,attempts = 3,retryDelay=10000,silent = true){
 
             server.on("listening", () => {
                 let message = `After ${totalAttempts} attempts, Successfully started listening on PORT ${PORT}...`
-                resolve({message:message})    
+                resolve({message:message,server:server})    
             })
 
             server.on("error", async (error) => {
@@ -80,9 +80,18 @@ const app = express()
 
 //**CONFIG**
 const { init_settings, global_config } = require("./config.js")
+const { time } = require("console")
 
 
 
+//** Connection maintenance**
+let server
+function timeStamp(){
+    const dateTime = new Date().toISOString()
+    let [date,time] = dateTime.split("T")
+    time = time.substring(0,time.indexOf("Z"))
+    return `[${date} : ${time}]`
+}
 
 //**INITIALISE **
 const loading_message_interval = loading_message("initialising application")
@@ -91,7 +100,8 @@ const init_result = new Promise((resolve,reject)=>{
         .then((resolution)=>{
             listen(app,init_settings.port,init_settings.listen_retry_attempts,init_settings.listen_retry_delay,init_settings.listen_silent)
             .then((resolution)=>{
-                console.log("Listening")
+                server = resolution.server
+                console.log(`Listening on port: ${init_settings.port} `)
                 resolve({message:"application successfully initialised",config:{init:init_settings,global:global_config}})
             })
             .catch((rejection)=>{
@@ -109,18 +119,32 @@ const init_result = new Promise((resolve,reject)=>{
     process.stdout.clearLine()
     process.stdout.cursorTo(0)
 })
-.then((resolution)=>{
-    console.log(resolution.message)
-    console.log("\n**Init settings**:\n",resolution.config.init)
-    console.log("\n**Global settings**:\n",resolution.config.global)
+.then(async (resolution)=>{
 
 
     try{
         
-
+        let mongooseIsUp = true
         mongoose.connection.on("disconnected",()=>{
-            alert("hi")
-            console.log("disconnected!!!")
+            mongooseIsUp = false
+            console.log(timeStamp(),`connection to mongo dropped.`)
+            server.close()
+            console.log(timeStamp(),"server offline.")
+        })
+
+        mongoose.connection.on("connected",()=>{
+            console.log(timeStamp(),"connection to mongo established.")
+            if(mongooseIsUp === false){
+                listen(app,init_settings.port,init_settings.listen_retry_attempts,init_settings.listen_retry_delay,init_settings.listen_silent)
+                .then((result)=>{
+                    server = result.server
+                    console.log(timeStamp(),"server online.")
+                    mongooseIsUp = true
+                })
+                .catch((err)=>{
+                    throw err
+                })
+            }
         })
 
 
@@ -130,10 +154,10 @@ const init_result = new Promise((resolve,reject)=>{
     require(join(global_config.directories.routes,"RouteHandling.js"))(app,mongoose,global_config)
     }
     catch(err){
-        throw err
+        console.error(err)
     }
     
-    loading_message(`listening on port ${init_settings.port}`)
+    //loading_message(`listening on port ${init_settings.port}`)
 
 })
 .catch((rejection)=>{

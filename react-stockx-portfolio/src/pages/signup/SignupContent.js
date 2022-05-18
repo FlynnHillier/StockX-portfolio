@@ -50,9 +50,8 @@ const SignupContent = () => {
                     
 
                     setErrorMessage(response.data.result ? "" : response.data.message)
-                    setAuth_state(response.data.result)
                     setEmail(response.data.result ? email : "")
-
+                    setAuth_state(response.data.result)
                 }}
                 fields={[
                     {

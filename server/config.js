@@ -37,8 +37,13 @@ const MongoStore = require("connect-mongo")
     let sessions = {
         secret:"ThisIsMySecretToYou!",
         saveUninitialized:true,
-        cookie: {maxAge: 1000 * 60 * 60 * 24 * 14},
         resave: true,
+        cookie:{
+            sameSite: false,
+            secure: process.env.NODE_ENV === "production",
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60 * 24 * 14,
+        },
         store:MongoStore.create({
             mongoUrl:mongo.access_uri,
             ttl: 60 * 60 * 24 * 14,
@@ -73,6 +78,10 @@ const MongoStore = require("connect-mongo")
     ]
 
 
+    let client = {
+        host:"http://localhost:5001"
+    }
+
 
 
 
@@ -85,10 +94,9 @@ module.exports = {
         mongo:mongo,
         req_schemas:req_schemas,
         stockx_api:stockx_api,
-
+        client:client,
         frontend_resources:{
             nav_routes:NavRoutes,
-
             HostUrl:""
         }
 

@@ -13,7 +13,7 @@ const HeadNotes = ({elements}) => {
 
             {elements.map((element)=>{
                 return (
-                    <div className='text-end px-2'>
+                    <div className='text-end px-2' key={elements.indexOf(element)}>
                         {element}
                     </div>
                 )

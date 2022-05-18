@@ -52,8 +52,10 @@ const LoginContent = () => {
                 
                 let current_email = response.data.result ? email : ""
                 setErrorMessage(response.data.message)
-                setAuth_state(response.data.result)
                 setEmail(current_email)
+
+                setAuth_state(response.data.result)
+
               }}
               title="Login"
               fields={[
