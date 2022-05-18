@@ -24,8 +24,7 @@ function build_private_api_stockx_search_router(mongoose_instance,config){
                 errorMessage:"invalid query",
             }  
         }),
-        (req,res,next)=>{
-
+        async (req,res,next)=>{
             const req_errors = validationResult(req).errors
             if(req_errors.length !== 0){
                 next({
@@ -34,18 +33,33 @@ function build_private_api_stockx_search_router(mongoose_instance,config){
                 })
             }
 
-            config.stockx_api.search(req.body.search_query)
-            .then((response)=>{
+            try {
+                const serverResponse = await config.stockx_api.search(req.body.search_query)
+
+                if(serverResponse.result !== true){
+                    if(serverResponse.accessDenied === true){
+                        return res.status(200).send({
+                            result:false,
+                            isAccessDenied:true
+                        })
+                    } else{
+                        return res.status(200).send({
+                            result:false,
+                            isAccessDenied:false,
+                        })
+                    }
+                }
+
                 res.status(200).send({
-                    data:response
+                    result:true,
+                    data:serverResponse.data
                 })
-            })
-            .catch((error)=>{
+            } catch(err){
                 next({
                     expected:false,
-                    error:error
+                    error:err
                 })
-            })
+            }
         }
     )
 

@@ -106,12 +106,12 @@ const SearchBar = ({onSearch,setSearchState,searchState,disabled}) => {
 
 const ErrorDisplay = ({errorMessage}) => {
     return errorMessage === undefined || errorMessage === "" ? <></> :
-    <>
-        ERROR: {errorMessage}
-    </> 
+    <Container className={"text-center errorMessageBox p-2 my-3"}>
+        {`ERROR: ${errorMessage}`}
+    </Container> 
 }
 
-const ModalLoading = ({show}) => {
+const ModalLoading = ({show,text}) => {
     return (
         <Modal
             show={show}
@@ -122,7 +122,7 @@ const ModalLoading = ({show}) => {
                         <Spinner animation='border'></Spinner>
                     </Col>
                     <Col xs={12} className="text-center">
-                        <span className="text-muted"> retrieving item Meta info...</span>
+                        <span className="text-muted"> {text}</span>
                     </Col>
                 </Row>
             </Container>
@@ -159,6 +159,7 @@ const AmmendCurrentStockPage = props => {
 
     function retrieveItemMetaInfo(urlKey){
         return new Promise(async (resolve,reject)=>{
+            try {
                 const serverResponse = await axios_default.post(
                     "/api/private/stockx/meta",
                     {
@@ -192,20 +193,21 @@ const AmmendCurrentStockPage = props => {
 
                 //traits
                 const traits = metaInfo.traits
-                metaInfo.styleCode = traits.find((trait)=>trait.name === "Style").value
-                metaInfo.colour = traits.find((trait)=>trait.name === "Colorway").value
+                metaInfo.styleCode = (traits.find((trait)=>trait.name === "Style") || {}).value
+                metaInfo.colour = (traits.find((trait)=>trait.name === "Colorway")|| {}).value
                 
                 metaInfo.traits = undefined
 
-                resolve(metaInfo)
+                resolve(metaInfo) 
+            }  catch(err){
+                console.log("error caught!")
+            }
         })
         
     }
 
 
     async function onItemSelect(urlKey){
-        console.log("item select: " + urlKey)
-        
         try {
             setIsLoadingItemData(true)
             setItemIsSelected(true)
@@ -222,37 +224,75 @@ const AmmendCurrentStockPage = props => {
     }
 
 
-    function onSearch(searchQuery){
-        setErrorMessage("")
-        if(searchQuery !== ""){
-            sendSearchQuery(searchQuery)
+    async function onSearch(searchQuery){
+
+        function sendSearchQuery(query){
+            return new Promise(async (resolve,reject)=>{
+               try{
+                   const serverResponse = await axios_default.post(
+                       "/api/private/stockx/search",
+                       {
+                           search_query:query
+                       }
+                   )
+                   
+                   if(serverResponse.data.result === true){
+                       console.log(serverResponse.data.data)
+                       resolve(serverResponse.data.data)
+                   }
+                   
+                   throw {
+                       accessDenied:serverResponse.data.isAccessDenied
+                   }
+                   
+               }  catch(err){
+                
+                   reject(err)
+               }
+            })
         }
-    }
 
-
-    async function sendSearchQuery(query){
-        setSearchIsPending(true)
-        setCurrentSearchQuery("")
-        try{
-            const response = await axios_default.post(
-                "/api/private/stockx/search",
-                {
-                    search_query:query
-                }
-            )
-
-            if(!(response.status === 200)){
-                throw Error({
-                    message:`server responded with unexpected code: ${response.status}`
+        function searchAttempts(maxAttempt,attempt=0){
+            return new Promise((resolve,reject)=>{
+                sendSearchQuery(searchQuery)
+                .then((data)=>{
+                    resolve(data)
                 })
-            }
+                .catch((err)=>{
+                    if(err.accessDenied === true){
+                        if(!(attempt > maxAttempt)){
+                            resolve(searchAttempts(maxAttempt,attempt + 1))
+                        } else{
+                            reject(`after ${maxAttempt} attempt(s) to search for '${searchQuery}', data could still not be retrieved.`)
+                         }
+                    } else{
+                        reject(err)
+                    }
+                })
+            })
+        }
 
-            setResultantSearchedData(response.data.data)
 
-        }  catch(err){
-            console.error(err)
-            setErrorMessage(err.message ? err.message : "An unknown error occured.")
+        setErrorMessage("")
+        if(searchQuery === ""){
+            return
+        }
+
+        setSearchIsPending(true)
+
+        try {
+
+            const maxSearches = 5
+
+            const data = await searchAttempts(maxSearches) 
+            setResultantSearchedData(data)
+
+
+
+        } catch(err){
+            setErrorMessage(err)
         } finally{
+            setCurrentSearchQuery("")
             setSearchIsPending(false)
         }
     }
@@ -274,6 +314,7 @@ const AmmendCurrentStockPage = props => {
 
     useEffect(()=>{
         if(searchIsPending === true){
+
             setSearchAllowed(false)
         }
         if(searchIsPending === false){
@@ -285,7 +326,13 @@ const AmmendCurrentStockPage = props => {
         <>
             <ModalLoading
                 show={isLoadingItemData}
+                text={"retrieving item Meta info..."}
             />
+            <ModalLoading
+                show={searchIsPending}
+                text={`searching for '${currentSearchQuery}'`}
+            />
+
 
             <Row>
                 <Col>

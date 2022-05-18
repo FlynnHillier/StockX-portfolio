@@ -40,8 +40,6 @@ function proxyInit(proxyFilePath){
             proxies.push(proxyInfo)
         }
     });
-
-
     return proxies
 }
 
@@ -74,15 +72,14 @@ function proxyRotate(){
 
 
 
-function search_item(search_term,max_results=4){
+async function search_item(search_term,max_results=4){
     proxyRotate()
-    return new Promise((resolves,rejects)=>{
-
+    try {
         if(!Number.isInteger(max_results)){
             throw 'max_results must be an integer'
         }
 
-        axios.get(
+        const stockxResponse = await axios.get(
             "/api/browse",
             {
                 params:{
@@ -92,52 +89,50 @@ function search_item(search_term,max_results=4){
                 }
             }
         )
-        .then((result)=>{
-            if(result.status !== 200){
-                rejects({
-                    reason:"status code incorrect"
-                })
-            }
 
+       
+        const products = stockxResponse.data.Products
+        let upperBound = -1
+        if(max_results < products.length){
+            upperBound = max_results
+        } else{
+            upperBound = products.length
+        }
 
-            const products = result.data.Products
+        let response = []
 
-
-            let upperBound = -1
-            if(max_results < products.length){
-                upperBound = max_results
-            } else{
-                upperBound = products.length
-            }
-
-            let response = []
-
-            for(let i = 0; i < upperBound;i++){
-                let product = products[i]
-
-
-
-                response.push({
-                    title:product.title,
-                    type:product.shoe,
-                    colorway:product.traits.find((trait)=> trait.name === "Colorway" || trait.name === "Color").value,
-                    urlKey:product.urlKey,
-                    releaseDate:(product.traits.find((trait)=>trait.name === "Release Date") || {}).value,
-                    media:product.media
-                })
-            }
-            
-            resolves(response)
-
-        })
-        .catch((error)=>{
-            rejects({
-                reason:"axios failure",
-                error:error
+        for(let i = 0; i < upperBound;i++){
+            let product = products[i]
+            response.push({
+                title:product.title,
+                type:product.shoe,
+                colorway:product.traits.find((trait)=> trait.name === "Colorway" || trait.name === "Color").value,
+                urlKey:product.urlKey,
+                releaseDate:(product.traits.find((trait)=>trait.name === "Release Date") || {}).value,
+                media:product.media
             })
-        })
-
-    })
+        }
+            
+            return {
+                result:true,
+                data:response
+            }
+    } catch(err){
+        
+        if(err.response.status !== 200){
+            if(err.response.status === 403){
+               return {
+                    result:false,
+                    accessDenied:true,
+                }
+            } else{
+                return {
+                    result:false,
+                    accessDenied:false,
+                }
+            }
+        }
+    }
 }
 
 
@@ -167,8 +162,6 @@ async function get_product_info(product_urlKey){
         return stockxResponse.data.data
 
     } catch(err){
-
-        console.log(err.response.status)
         let errorForThrow
         if(err.response.status === 403){
             errorForThrow = {
@@ -219,7 +212,7 @@ async function get_product_specific_sizing(sizes=[],urlKey){
 
         for(let size of sizes){
 
-            let size_info = data.variants.find((variant) => variant.traits.size == size || variant.traits.size == size + "Y" )
+            let size_info = data.variants.find((variant) => variant.traits.size == size || variant.traits.size == size + "Y" || variant.traits.size == size + "W" )
             
             if(size_info === undefined){
                 response.sizesInfo.push({
