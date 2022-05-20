@@ -21,7 +21,7 @@ require('dotenv').config({path:join(__dirname,".env")})
 
     let directories = {
         static:join(__dirname,"build"),
-        routes:join(__dirname,"routes"),
+        routes:join(__dirname,"Routes"),
     }   
 
     let mongo = {
