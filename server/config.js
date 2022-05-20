@@ -25,10 +25,6 @@ const MongoStore = require("connect-mongo")
     }   
 
 
-
-    console.log(process.env.port)
-    console.log(process.env.mongo_uname, process.env.mongo_pass)
-
     let mongo = {
         access_uri:`mongodb+srv://${process.env.mongo_uname}:${process.env.mongo_pass}@cluster0.jjpy4.mongodb.net/StockX-Portfolio-App?retryWrites=true&w=majority`,
         mongoose_models: require("./misc/mongoose_models.js"),
