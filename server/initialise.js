@@ -21,8 +21,8 @@ function listen(app,PORT = 5000,attempts = 3,retryDelay=10000,silent = true){
     return new Promise ((resolve,reject)=>{        
         if(attempts <= 0){
             reject(`given '<= 0' attempts, no attempt at a connection to PORT ${PORT} was made.`)
-        } else if(PORT <= 0 || PORT > 9999 || typeof PORT != "number"){ 
-            reject(`invalid PORT '${PORT}'. Must be of type 'number' of minimum 1 , maximum 9999.`)
+        // } else if(PORT <= 0 || PORT > 9999 || typeof PORT != "number"){ 
+        //     reject(`invalid PORT '${PORT}'. Must be of type 'number' of minimum 1 , maximum 9999.`)
         }else{
 
             let totalAttempts = 1

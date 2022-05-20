@@ -4,7 +4,7 @@ const MongoStore = require("connect-mongo")
 
 
     let init_settings = {
-        port : 5000,
+        port : process.env.port || 5000,
         listen_retry_attempts : 3,
         listen_retry_delay : 4000,
         listen_silent : true,
@@ -22,10 +22,15 @@ const MongoStore = require("connect-mongo")
     let directories = {
         static:join(__dirname,"static_content"),
         routes:join(__dirname,"routes"),
-    }
+    }   
+
+
+
+    console.log(process.env.port)
+    console.log(process.env.mongo_uname, process.env.mongo_pass)
 
     let mongo = {
-        access_uri:"mongodb+srv://app-dev:temp@cluster0.jjpy4.mongodb.net/StockX-Portfolio-App?retryWrites=true&w=majority",
+        access_uri:`mongodb+srv://${process.env.mongo_uname}:${process.env.mongo_pass}@cluster0.jjpy4.mongodb.net/StockX-Portfolio-App?retryWrites=true&w=majority`,
         mongoose_models: require("./misc/mongoose_models.js"),
 
         user_creation:{
