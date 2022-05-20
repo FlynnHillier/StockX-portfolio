@@ -1,10 +1,10 @@
 const {join} = require("path")
 const MongoStore = require("connect-mongo")
-
+require('dotenv').config({path:join(__dirname,".env")})
 
 
     let init_settings = {
-        port : process.env.port || 5000,
+        port : process.env.PORT || 5000,
         listen_retry_attempts : 3,
         listen_retry_delay : 4000,
         listen_silent : true,
@@ -24,9 +24,8 @@ const MongoStore = require("connect-mongo")
         routes:join(__dirname,"routes"),
     }   
 
-
     let mongo = {
-        access_uri:`mongodb+srv://${process.env.mongo_uname}:${process.env.mongo_pass}@cluster0.jjpy4.mongodb.net/StockX-Portfolio-App?retryWrites=true&w=majority`,
+        access_uri:`mongodb+srv://${process.env.MONGO_UNAME}:${process.env.MONGO_PASS}@cluster0.jjpy4.mongodb.net/StockX-Portfolio-App?retryWrites=true&w=majority`,
         mongoose_models: require("./misc/mongoose_models.js"),
 
         user_creation:{
