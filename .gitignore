@@ -1,3 +1,5 @@
 /react-stockx-portfolio/node_modules
 /server/node_modules
 /server/misc/proxies.txt
+/react-stockx-portfolio
+/server/.env
