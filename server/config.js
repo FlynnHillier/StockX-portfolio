@@ -20,7 +20,7 @@ const MongoStore = require("connect-mongo")
 
 
     let directories = {
-        static:join(__dirname,"static_content"),
+        static:join(__dirname,"build"),
         routes:join(__dirname,"routes"),
     }   
 

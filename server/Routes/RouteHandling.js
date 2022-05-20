@@ -9,13 +9,15 @@ function route_handling(app,mongoose_instance,config){
 
     app.use(bodyparser.urlencoded({ extended: true }))
     app.use(bodyparser.json())    
-    app.use(cors(
-        {
-            origin: config.client.host,
-            credentials: true,
-        }
-    ))
+    // app.use(cors(
+    //     {
+    //         origin: config.client.host,
+    //         credentials: true,
+    //     }
+    // ))
     app.use(sessions(config.sessions))
+    
+
 
 
     const api = require(path.join(config.directories.routes,"api","api_RouteHandling.js"))(mongoose_instance,config)
@@ -27,10 +29,13 @@ function route_handling(app,mongoose_instance,config){
     app.use("/auth",auth)
     
     app.use(express.static(config.directories.static))
-
-    app.use("*",(req,res)=>{
-        res.status(404).send("The requested resource was not found.")
+    app.get("*",(req,res)=>{
+        res.status(200).sendFile(path.join(config.directories.static,"index.html"))
     })
+
+    // app.use("*",(req,res)=>{
+    //     res.status(404).send("The requested resource was not found.")
+    // })
 
 
     app.use((err,req,res,next)=>{
