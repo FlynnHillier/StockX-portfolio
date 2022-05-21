@@ -113,7 +113,7 @@ const SizingSelector = ({sizingData,selectedSize,setSelectedSize}) => {
     }
   
     const maxSize = 14
-    const minSize = 4
+    const minSize = 3.5
 
     let currentlyOwnedSizes = []
     for(let sizeObj of sizes){
